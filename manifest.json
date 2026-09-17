@@ -1,0 +1,16 @@
+{
+  "name": "Painel de Precificação & Tributos — Lanzi",
+  "short_name": "Precificação Lanzi",
+  "description": "Precificação por Lucro Real, ICMS/DIFAL, taxas de marketplace, GMV e histórico de produtos — Lanzi Autoparts & MS Indústria.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#F2F2F7",
+  "theme_color": "#4F46E5",
+  "orientation": "any",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
