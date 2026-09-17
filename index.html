@@ -8,6 +8,18 @@
 <meta name="theme-color" content="#4F46E5">
 <link rel="icon" href="./icon-192.png">
 <link rel="apple-touch-icon" href="./icon-192.png">
+<script>
+(function(){
+  try{
+    var raw = localStorage.getItem('lanzi-precificacao-v1');
+    if(raw){
+      var s = JSON.parse(raw);
+      var t = s.local && s.local.theme;
+      if(t==='light' || t==='dark') document.documentElement.setAttribute('data-theme', t);
+    }
+  }catch(e){}
+})();
+</script>
 <style>
 :root{
   --bg:#F2F2F7; --surface:#FFFFFF; --surface-alt:#F2F2F7; --surface-elev:rgba(255,255,255,.72);
@@ -215,11 +227,29 @@ footer.note{color:var(--muted);font-size:12px;margin-top:28px;max-width:80ch;lin
 .callout{background:var(--neg-soft);color:var(--neg);border-radius:var(--radius-md);
   padding:12px 15px;font-size:12.5px;margin-bottom:16px;line-height:1.55;}
 .callout.info{background:var(--accent-soft);color:var(--accent);}
+.lock-screen{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  z-index:200;display:none;align-items:center;justify-content:center;padding:20px;}
+.lock-card{background:var(--surface);border-radius:var(--radius-lg);padding:32px 28px;max-width:360px;width:100%;
+  text-align:center;box-shadow:var(--shadow-lg);}
+.lock-card .icon-chip{width:46px;height:46px;font-size:22px;margin:0 auto 14px;}
+.lock-card h2{justify-content:center;font-size:17px;margin-bottom:6px;}
+.lock-card input{margin:14px 0 6px;text-align:center;}
+.lock-card .small-btn{width:100%;margin-top:8px;}
 </style>
 </head>
 <body>
 
 <header class="top">
+  <div id="lockScreen" class="lock-screen">
+    <div class="lock-card">
+      <div class="icon-chip">🔒</div>
+      <h2>Painel protegido</h2>
+      <p class="desc">Digite a senha de acesso à nuvem para continuar sincronizando.</p>
+      <input type="password" id="lock-password" placeholder="Senha">
+      <button class="small-btn" id="btnUnlock">Entrar</button>
+      <p class="hint" id="lock-error" style="color:var(--neg);min-height:14px;"></p>
+    </div>
+  </div>
   <div class="brand">
     <div class="logo">🧮</div>
     <div class="names">
@@ -229,6 +259,7 @@ footer.note{color:var(--muted);font-size:12px;margin-top:28px;max-width:80ch;lin
   </div>
   <span class="cloud-pill cloud-off" id="cloudStatus">Somente neste navegador</span>
   <span class="status-pill" id="statusPill"><span class="dot"></span><span id="statusText">operacional</span></span>
+  <button class="ghost" id="btnThemeToggle" title="Alternar tema claro/escuro">🌙</button>
   <button class="ghost" id="btnReset">Restaurar padrões</button>
 </header>
 
@@ -273,15 +304,27 @@ footer.note{color:var(--muted);font-size:12px;margin-top:28px;max-width:80ch;lin
   <div class="card" style="margin-top:16px;">
     <h2><span class="icon-chip">☁️</span>Sincronização em nuvem</h2>
     <p class="desc">Conecte a um backend do Google Apps Script (planilha do Google) para que Configurações, Marketplaces, GMV e o Histórico de produtos fiquem compartilhados entre todos que usam este link — em qualquer computador, sem depender de conta do Claude. Deixe em branco para usar o app só neste navegador.</p>
+    <div class="callout">🔒 Essa URL funciona como uma senha mestra do banco de dados: quem a tiver consegue ler e alterar tudo, mesmo fora do app. Ela fica oculta por padrão nesta tela — use o ícone de olho só para conferir o que digitou, e evite mostrar essa aba em telas compartilhadas ou prints. Compartilhe a URL apenas em privado com quem for configurar a sincronização em cada computador.</div>
     <div class="grid cols-2">
       <div class="field">
         <label>URL do Web App do Google Apps Script</label>
-        <input type="text" id="cloud-url" data-bind="local.cloudUrl" placeholder="https://script.google.com/macros/s/AAAA.../exec">
+        <div class="row-inline" style="gap:6px;">
+          <div style="flex:1;"><input type="password" autocomplete="off" id="cloud-url" data-bind="local.cloudUrl" placeholder="https://script.google.com/macros/s/AAAA.../exec"></div>
+          <button type="button" class="ghost" id="btnToggleCloudUrl" style="flex:0;" title="Mostrar/ocultar">👁</button>
+        </div>
       </div>
       <div class="field">
-        <label>Seu nome (aparece como autor no Histórico)</label>
-        <input type="text" id="cloud-username" data-bind="local.userName" placeholder="ex.: Carla, financeiro">
+        <label>Senha de acesso à nuvem</label>
+        <div class="row-inline" style="gap:6px;">
+          <div style="flex:1;"><input type="password" autocomplete="new-password" id="cloud-password" data-bind="local.appPassword" placeholder="defina ou digite a senha combinada com a equipe"></div>
+          <button type="button" class="ghost" id="btnToggleCloudPass" style="flex:0;" title="Mostrar/ocultar">👁</button>
+        </div>
+        <p class="hint">A primeira pessoa a conectar com uma senha nova a define para todo mundo daí em diante.</p>
       </div>
+    </div>
+    <div class="field">
+      <label>Seu nome (aparece como autor no Histórico)</label>
+      <input type="text" id="cloud-username" data-bind="local.userName" placeholder="ex.: Carla, financeiro">
     </div>
     <button class="small-btn" id="btnConnectCloud">Conectar / atualizar agora</button>
     <p class="hint" style="margin-top:8px;">Veja o passo a passo de como criar a planilha e publicar o backend nas instruções que acompanham este arquivo.</p>
@@ -508,7 +551,7 @@ function defaultState(){
     marketplaceFees: mkt,
     products: [],
     editingProductId: null,
-    local: { userName:'', cloudUrl:'' },
+    local: { userName:'', cloudUrl:'', appPassword:'', theme:'system' },
     gmv: { months: Array.from({length:12},()=>({fat:null,imp:null,cmv:null,com:null,fre:null,emb:null,ins:null,pla:null,fol:null,con:null})) }
   };
 }
@@ -1284,6 +1327,30 @@ function withFocusPreserved(containerId, renderFn){
   }
 }
 
+/* ===================== TEMA CLARO/ESCURO ===================== */
+function effectiveIsDark(){
+  const t = state.local.theme || 'system';
+  if(t==='dark') return true;
+  if(t==='light') return false;
+  return !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+}
+function applyTheme(){
+  const t = state.local.theme || 'system';
+  if(t==='system'){ document.documentElement.removeAttribute('data-theme'); }
+  else { document.documentElement.setAttribute('data-theme', t); }
+  const btn = document.getElementById('btnThemeToggle');
+  if(btn){
+    const dark = effectiveIsDark();
+    btn.textContent = dark ? '☀️' : '🌙';
+    btn.title = dark ? 'Mudar para modo claro' : 'Mudar para modo escuro';
+  }
+}
+function toggleTheme(){
+  state.local.theme = effectiveIsDark() ? 'light' : 'dark';
+  saveState();
+  applyTheme();
+}
+
 /* ===================== BOOTSTRAP / NAVEGAÇÃO ===================== */
 function renderAll(){
   renderConfig();
@@ -1348,21 +1415,37 @@ document.getElementById('btnReset').addEventListener('click', ()=>{
 document.getElementById('btnSaveProduct').addEventListener('click', saveProductRecord);
 document.getElementById('btnNewProduct').addEventListener('click', newProductForm);
 document.getElementById('btnConnectCloud').addEventListener('click', reconnectCloud);
+function wireMaskToggle(inputId, btnId){
+  const inp = document.getElementById(inputId), btn = document.getElementById(btnId);
+  btn.addEventListener('click', ()=>{
+    const showing = inp.type === 'text';
+    inp.type = showing ? 'password' : 'text';
+    btn.textContent = showing ? '👁' : '🙈';
+  });
+}
+wireMaskToggle('cloud-url', 'btnToggleCloudUrl');
+wireMaskToggle('cloud-password', 'btnToggleCloudPass');
 
 initTabs();
 bindGenericInputs(document);
 renderAll();
+applyTheme();
+document.getElementById('btnThemeToggle').addEventListener('click', toggleTheme);
+initLockScreen();
 initCloudSync();
 /* ===================== SINCRONIZAÇÃO EM NUVEM (Google Planilhas via Apps Script) =====================
    Este app fala com um backend simples publicado como "Web App" do Google Apps Script, que lê e
    grava numa Google Planilha. Funciona em qualquer hospedagem (GitHub Pages, Netlify, arquivo local)
    e para qualquer pessoa com o link — não depende de conta ou workspace do Claude.
-   Se o campo de URL estiver vazio, o app funciona 100% no navegador local (localStorage), como antes. */
+   Se o campo de URL estiver vazio, o app funciona 100% no navegador local (localStorage), como antes.
+   Toda chamada leva a senha de acesso; o próprio backend recusa sem ela (verifyPassword_ no Code.gs) —
+   então quem só tiver a URL, sem a senha, não consegue ler nem gravar nada na planilha. */
 let applyingRemote = false;
 let cloudConfigTimer = null, cloudGmvTimer = null, cloudPollTimer = null;
 let lastConfigJson = null, lastGmvJson = null;
 
 function getCloudUrl(){ return (state.local && state.local.cloudUrl || '').trim(); }
+function getCloudPass(){ return (state.local && state.local.appPassword || '').trim(); }
 
 function setCloudStatus(mode){
   const el = document.getElementById('cloudStatus');
@@ -1371,6 +1454,7 @@ function setCloudStatus(mode){
     cloud:   {text:'☁️ Sincronizado na nuvem', cls:'cloud-on'},
     syncing: {text:'☁️ Sincronizando…',         cls:'cloud-syncing'},
     error:   {text:'⚠️ Nuvem configurada, mas sem resposta', cls:'cloud-off'},
+    auth:    {text:'🔒 Senha incorreta',        cls:'cloud-off'},
     local:   {text:'Somente neste navegador',   cls:'cloud-off'},
   };
   const m = map[mode] || map.local;
@@ -1381,16 +1465,18 @@ function setCloudStatus(mode){
 async function cloudFetch(action, method, payload){
   const base = getCloudUrl();
   if(!base) return null;
+  const pass = getCloudPass();
   try{
     let res;
     if(method==='GET'){
-      res = await fetch(base + (base.includes('?')?'&':'?') + 'action=' + encodeURIComponent(action), { method:'GET' });
+      const sep = base.includes('?') ? '&' : '?';
+      res = await fetch(base + sep + 'action=' + encodeURIComponent(action) + '&pass=' + encodeURIComponent(pass), { method:'GET' });
     } else {
       // text/plain evita o preflight de CORS que o Apps Script não responde bem
       res = await fetch(base, {
         method:'POST',
         headers:{ 'Content-Type':'text/plain;charset=utf-8' },
-        body: JSON.stringify(Object.assign({ action }, payload||{}))
+        body: JSON.stringify(Object.assign({ action, pass }, payload||{}))
       });
     }
     if(!res.ok) return null;
@@ -1423,30 +1509,40 @@ async function refreshProductsFromCloud(){
 
 async function initCloudSync(){
   const url = getCloudUrl();
-  if(!url){ setCloudStatus('local'); return; }
+  if(!url){ setCloudStatus('local'); hideLockScreen(); return; }
   setCloudStatus('syncing');
-  let sawAnyOk = false;
+  let sawAnyOk = false, sawAuthError = false;
 
   const cfgRes = await cloudFetch('getConfig','GET');
   if(cfgRes && cfgRes.ok){
     sawAnyOk = true;
     if(cfgRes.data){ applyRemoteConfig(cfgRes.data); lastConfigJson = JSON.stringify(cfgRes.data); }
     else { await cloudFetch('setConfig','POST', {data:{config:state.config, fiscal:state.fiscal, marketplaceFees:state.marketplaceFees}}); }
+  } else if(cfgRes && cfgRes.code==='auth'){ sawAuthError = true; }
+
+  if(!sawAuthError){
+    const gmvRes = await cloudFetch('getGmv','GET');
+    if(gmvRes && gmvRes.ok){
+      sawAnyOk = true;
+      if(gmvRes.data && gmvRes.data.months){
+        applyingRemote = true; state.gmv.months = gmvRes.data.months; applyingRemote = false; saveState();
+        lastGmvJson = JSON.stringify(gmvRes.data.months);
+      } else { await cloudFetch('setGmv','POST', {data:{months:state.gmv.months}}); }
+    } else if(gmvRes && gmvRes.code==='auth'){ sawAuthError = true; }
   }
 
-  const gmvRes = await cloudFetch('getGmv','GET');
-  if(gmvRes && gmvRes.ok){
-    sawAnyOk = true;
-    if(gmvRes.data && gmvRes.data.months){
-      applyingRemote = true; state.gmv.months = gmvRes.data.months; applyingRemote = false; saveState();
-      lastGmvJson = JSON.stringify(gmvRes.data.months);
-    } else { await cloudFetch('setGmv','POST', {data:{months:state.gmv.months}}); }
+  if(!sawAuthError) await refreshProductsFromCloud();
+
+  if(sawAuthError){
+    setCloudStatus('auth');
+    showLockScreen('Senha incorreta. Confira com quem configurou a nuvem e tente de novo.');
+  } else if(sawAnyOk){
+    setCloudStatus('cloud');
+    hideLockScreen();
+    startCloudPolling();
+  } else {
+    setCloudStatus('error');
   }
-
-  await refreshProductsFromCloud();
-
-  if(sawAnyOk){ setCloudStatus('cloud'); startCloudPolling(); }
-  else { setCloudStatus('error'); }
 }
 
 function startCloudPolling(){
@@ -1454,6 +1550,7 @@ function startCloudPolling(){
   cloudPollTimer = setInterval(async ()=>{
     if(applyingRemote || !getCloudUrl()) return;
     const cfgRes = await cloudFetch('getConfig','GET');
+    if(cfgRes && cfgRes.code==='auth'){ setCloudStatus('auth'); showLockScreen('Senha incorreta. Confira com quem configurou a nuvem e tente de novo.'); clearInterval(cloudPollTimer); return; }
     if(cfgRes && cfgRes.ok && cfgRes.data){
       const j = JSON.stringify(cfgRes.data);
       if(j !== lastConfigJson){ lastConfigJson = j; applyRemoteConfig(cfgRes.data); }
@@ -1475,7 +1572,7 @@ function scheduleCloudConfigWrite(){
     const data = { config: state.config, fiscal: state.fiscal, marketplaceFees: state.marketplaceFees };
     const res = await cloudFetch('setConfig','POST', {data});
     lastConfigJson = JSON.stringify(data);
-    setCloudStatus(res && res.ok ? 'cloud' : 'error');
+    setCloudStatus(res && res.ok ? 'cloud' : (res && res.code==='auth' ? 'auth' : 'error'));
   }, 900);
 }
 
@@ -1508,6 +1605,32 @@ async function cloudDeleteProduct(id){
 function reconnectCloud(){
   clearInterval(cloudPollTimer);
   initCloudSync();
+}
+
+/* ---- Tela de bloqueio: aparece quando a nuvem já está configurada mas a senha falhou ---- */
+function showLockScreen(message){
+  const el = document.getElementById('lockScreen');
+  if(!el) return;
+  document.getElementById('lock-error').textContent = message || '';
+  el.style.display = 'flex';
+}
+function hideLockScreen(){
+  const el = document.getElementById('lockScreen');
+  if(el) el.style.display = 'none';
+}
+function initLockScreen(){
+  const btn = document.getElementById('btnUnlock');
+  const inp = document.getElementById('lock-password');
+  if(!btn || !inp) return;
+  const submit = ()=>{
+    state.local.appPassword = inp.value;
+    saveState();
+    const passField = document.getElementById('cloud-password');
+    if(passField) passField.value = inp.value;
+    reconnectCloud();
+  };
+  btn.addEventListener('click', submit);
+  inp.addEventListener('keydown', (e)=>{ if(e.key==='Enter') submit(); });
 }
 </script>
 <script>
