@@ -235,6 +235,16 @@ footer.note{color:var(--muted);font-size:12px;margin-top:28px;max-width:80ch;lin
 .lock-card h2{justify-content:center;font-size:17px;margin-bottom:6px;}
 .lock-card input{margin:14px 0 6px;text-align:center;}
 .lock-card .small-btn{width:100%;margin-top:8px;}
+input.locked-field{letter-spacing:3px;opacity:.65;cursor:not-allowed;}
+.rank-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--sep);font-size:13px;}
+.rank-row:last-child{border-bottom:none;}
+.rank-row .name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.rank-row .sub{color:var(--muted);font-size:11px;}
+.mini-bar-row{margin-bottom:12px;}
+.mini-bar-row .top{display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px;}
+.mini-bar-row .top .name{font-weight:600;}
+.mini-bar-track{height:7px;background:var(--surface-alt);border-radius:999px;overflow:hidden;}
+.mini-bar-fill{height:100%;background:var(--accent);border-radius:999px;}
 </style>
 </head>
 <body>
@@ -266,7 +276,8 @@ footer.note{color:var(--muted);font-size:12px;margin-top:28px;max-width:80ch;lin
 <nav class="tabs" id="tabNav">
   <div class="tabs-track" id="tabsTrack">
     <span class="tab-indicator" id="tabIndicator"></span>
-    <button data-tab="config" class="active">⚙️ Configurações</button>
+    <button data-tab="overview" class="active">📈 Visão Geral</button>
+    <button data-tab="config">⚙️ Configurações</button>
     <button data-tab="icms">🧾 ICMS &amp; DIFAL</button>
     <button data-tab="marketplaces">🛒 Marketplaces</button>
     <button data-tab="precificacao">💰 Precificação</button>
@@ -277,8 +288,23 @@ footer.note{color:var(--muted);font-size:12px;margin-top:28px;max-width:80ch;lin
 
 <main>
 
+<!-- ===================== TAB: VISÃO GERAL ===================== -->
+<section class="tab active" id="tab-overview">
+  <div class="kpi-strip" id="overview-kpis"></div>
+  <div class="grid cols-2" id="overview-rankings"></div>
+  <div class="grid cols-2" style="margin-top:16px;" id="overview-breakdowns"></div>
+  <div class="card" style="margin-top:16px;">
+    <h2><span class="icon-chip">⚡</span>Ações rápidas</h2>
+    <div class="row-inline" style="gap:10px;flex-wrap:wrap;">
+      <button class="small-btn" id="btnOverviewNewProduct">+ Novo produto</button>
+      <button class="small-btn alt" id="btnOverviewHistorico">Ver histórico completo</button>
+      <button class="small-btn alt" id="btnOverviewGmv">Ver GMV &amp; Equilíbrio</button>
+    </div>
+  </div>
+</section>
+
 <!-- ===================== TAB: CONFIG ===================== -->
-<section class="tab active" id="tab-config">
+<section class="tab" id="tab-config">
   <div class="grid cols-2">
     <div class="card">
       <h2><span class="icon-chip">🏭</span>Armazém e origem fiscal</h2>
@@ -304,20 +330,20 @@ footer.note{color:var(--muted);font-size:12px;margin-top:28px;max-width:80ch;lin
   <div class="card" style="margin-top:16px;">
     <h2><span class="icon-chip">☁️</span>Sincronização em nuvem</h2>
     <p class="desc">Conecte a um backend do Google Apps Script (planilha do Google) para que Configurações, Marketplaces, GMV e o Histórico de produtos fiquem compartilhados entre todos que usam este link — em qualquer computador, sem depender de conta do Claude. Deixe em branco para usar o app só neste navegador.</p>
-    <div class="callout">🔒 Essa URL funciona como uma senha mestra do banco de dados: quem a tiver consegue ler e alterar tudo, mesmo fora do app. Ela fica oculta por padrão nesta tela — use o ícone de olho só para conferir o que digitou, e evite mostrar essa aba em telas compartilhadas ou prints. Compartilhe a URL apenas em privado com quem for configurar a sincronização em cada computador.</div>
+    <div class="callout">🔒 Essa URL (e a senha) funcionam como uma chave mestra do banco de dados. Por isso, depois de salvos, esses dois campos <strong>nunca mais reexibem o valor</strong> — nem para quem configurou. Se precisar conferir ou trocar, clique em "Alterar": isso apaga o valor salvo e libera o campo para digitar um novo (não tem como recuperar o antigo por aqui — anote em um lugar seguro, como um gerenciador de senhas).</div>
     <div class="grid cols-2">
       <div class="field">
         <label>URL do Web App do Google Apps Script</label>
         <div class="row-inline" style="gap:6px;">
-          <div style="flex:1;"><input type="password" autocomplete="off" id="cloud-url" data-bind="local.cloudUrl" placeholder="https://script.google.com/macros/s/AAAA.../exec"></div>
-          <button type="button" class="ghost" id="btnToggleCloudUrl" style="flex:0;" title="Mostrar/ocultar">👁</button>
+          <div style="flex:1;"><input type="password" autocomplete="off" id="cloud-url" data-bind="local.cloudUrl" data-writeonly="true" placeholder="https://script.google.com/macros/s/AAAA.../exec"></div>
+          <button type="button" class="ghost" id="btnToggleCloudUrl" style="flex:0;">Alterar</button>
         </div>
       </div>
       <div class="field">
         <label>Senha de acesso à nuvem</label>
         <div class="row-inline" style="gap:6px;">
-          <div style="flex:1;"><input type="password" autocomplete="new-password" id="cloud-password" data-bind="local.appPassword" placeholder="defina ou digite a senha combinada com a equipe"></div>
-          <button type="button" class="ghost" id="btnToggleCloudPass" style="flex:0;" title="Mostrar/ocultar">👁</button>
+          <div style="flex:1;"><input type="password" autocomplete="new-password" id="cloud-password" data-bind="local.appPassword" data-writeonly="true" placeholder="defina ou digite a senha combinada com a equipe"></div>
+          <button type="button" class="ghost" id="btnToggleCloudPass" style="flex:0;">Alterar</button>
         </div>
         <p class="hint">A primeira pessoa a conectar com uma senha nova a define para todo mundo daí em diante.</p>
       </div>
@@ -739,17 +765,34 @@ function fillUfSelect(sel, selected){
   sel.innerHTML = UF_LIST.map(uf=>`<option value="${uf}" ${uf===selected?'selected':''}>${uf}</option>`).join('');
 }
 
+// Define o valor exibido num campo ligado a data-bind. Campos marcados data-writeonly="true"
+// (URL/senha da nuvem) nunca reexibem o valor salvo: se já existe um valor, mostram pontos e
+// ficam bloqueados para edição direta — só é possível SUBSTITUIR (botão "Alterar"), nunca reler.
+function setDisplayValueForBind(el, path){
+  const isBool = el.getAttribute('data-bool')==='true';
+  const isPercent = el.getAttribute('data-percent')==='true';
+  const isWriteonly = el.getAttribute('data-writeonly')==='true';
+  let v = getPath(state, path);
+  if(isWriteonly){
+    const hasValue = v!=null && v!=='';
+    el.readOnly = hasValue;
+    el.classList.toggle('locked-field', hasValue);
+    el.value = hasValue ? '••••••••••••••' : '';
+    return;
+  }
+  if(el.tagName==='SELECT'){ el.value = v!=null ? v : ''; }
+  else if(isBool){ el.checked = !!v; }
+  else if(v==null){ el.value=''; }
+  else { el.value = isPercent ? (v*100) : v; }
+}
+
 function bindGenericInputs(root){
   root.querySelectorAll('[data-bind]').forEach(el=>{
     const path = el.getAttribute('data-bind');
     const isBool = el.getAttribute('data-bool')==='true';
     const isPercent = el.getAttribute('data-percent')==='true';
     // valor atual (sempre atualizado, mesmo em re-chamadas após reset)
-    let v = getPath(state, path);
-    if(el.tagName==='SELECT'){ el.value = v!=null ? v : ''; }
-    else if(isBool){ el.checked = !!v; }
-    else if(v==null){ el.value=''; }
-    else { el.value = isPercent ? (v*100) : v; }
+    setDisplayValueForBind(el, path);
 
     if(el.dataset.boundGeneric) return;
     el.dataset.boundGeneric = '1';
@@ -999,6 +1042,8 @@ function renderPrecificacao(){
   renderChannelTable();
 }
 /* ===================== HISTÓRICO DE PRODUTOS ===================== */
+const expandedHistoryIds = new Set(); // controla quais linhas mostram a evolução expandida (não persiste — é só de UI)
+
 function buildSnapshotFromState(){
   return {
     config: JSON.parse(JSON.stringify(state.config)),
@@ -1022,14 +1067,7 @@ function computeSavedResults(snap){
 function refreshBoundInputs(selector){
   document.querySelectorAll(selector).forEach(el=>{
     if(!el.hasAttribute('data-bind')) return;
-    const path = el.getAttribute('data-bind');
-    let v = getPath(state, path);
-    const isBool = el.getAttribute('data-bool')==='true';
-    const isPercent = el.getAttribute('data-percent')==='true';
-    if(el.tagName==='SELECT'){ el.value = v!=null?v:''; }
-    else if(isBool){ el.checked = !!v; }
-    else if(v==null){ el.value=''; }
-    else { el.value = isPercent ? v*100 : v; }
+    setDisplayValueForBind(el, el.getAttribute('data-bind'));
   });
 }
 
@@ -1046,6 +1084,20 @@ function saveProductRecord(){
   if(state.editingProductId){
     const rec = state.products.find(r=>r.id===state.editingProductId);
     if(rec){
+      // guarda um retrato do que estava salvo ANTES de sobrescrever, para poder comparar depois
+      const prevKeys = Object.keys(rec.savedResults||{});
+      if(prevKeys.length){
+        if(!Array.isArray(rec.history)) rec.history = [];
+        const prevBest = prevKeys.reduce((a,b)=> rec.savedResults[b].margemFinal>rec.savedResults[a].margemFinal?b:a);
+        rec.history.push({
+          savedAt: rec.updatedAt,
+          canal: prevBest,
+          pdv: rec.savedResults[prevBest].pdv,
+          margemFinal: rec.savedResults[prevBest].margemFinal,
+          cmv: rec.savedResults[prevBest].cmv
+        });
+        if(rec.history.length > 30) rec.history = rec.history.slice(-30); // evita crescer sem limite
+      }
       Object.assign(rec, snap, { nome:p.nome, sku:p.sku, fornecedor:p.fornecedor, linha:p.linha, updatedAt:now, savedResults,
         criadoPorNome: rec.criadoPorNome || myName, atualizadoPorNome: myName || rec.atualizadoPorNome || '' });
       saveState(); renderAll();
@@ -1058,7 +1110,7 @@ function saveProductRecord(){
       return;
     }
   }
-  const rec = Object.assign({ id: uid(), createdAt: now, updatedAt: now, criadoPorNome: myName, atualizadoPorNome: myName }, snap,
+  const rec = Object.assign({ id: uid(), createdAt: now, updatedAt: now, criadoPorNome: myName, atualizadoPorNome: myName, history: [] }, snap,
     { nome:p.nome, sku:p.sku, fornecedor:p.fornecedor, linha:p.linha, savedResults });
   state.products.push(rec);
   state.editingProductId = rec.id;
@@ -1107,6 +1159,7 @@ function duplicateProductRecord(id){
   copy.id = uid();
   copy.nome = (rec.nome||'Produto') + ' (cópia)';
   copy.createdAt = copy.updatedAt = Date.now();
+  copy.history = []; // é um produto novo — começa sem histórico de alterações
   state.products.push(copy);
   saveState();
   renderHistorico();
@@ -1153,12 +1206,13 @@ function renderHistorico(){
       table.innerHTML = state.products.length ? '<tbody><tr><td style="padding:14px;color:var(--muted);">Nenhum resultado para este filtro.</td></tr></tbody>' : '';
       return;
     }
-    let html = `<thead><tr><th>Produto</th><th>Fornecedor</th><th>Linha</th><th>Salvo em</th><th>Melhor canal</th><th>Margem salva</th><th>Margem hoje</th><th>Δ</th><th>Ações</th></tr></thead><tbody>`;
+    let html = `<thead><tr><th>Produto</th><th>Fornecedor</th><th>Linha</th><th>Salvo em</th><th>Melhor canal</th><th>Margem salva</th><th>Desde o cadastro anterior</th><th>Margem hoje</th><th>Δ vs. hoje</th><th>Ações</th></tr></thead><tbody>`;
     list.forEach(rec=>{
       const keys = Object.keys(rec.savedResults||{});
       if(!keys.length) return;
       const bestKey = keys.reduce((a,b)=> rec.savedResults[b].margemFinal>rec.savedResults[a].margemFinal?b:a);
       const savedMargem = rec.savedResults[bestKey].margemFinal;
+      const savedPdv = rec.savedResults[bestKey].pdv;
       let hojeMargem = null, delta = null;
       try{
         const ctxHoje = ctxFromRecord(rec, true);
@@ -1170,13 +1224,33 @@ function renderHistorico(){
       const deltaTxt = delta==null ? '—' : (delta>=0?'+':'')+fmtPct(delta);
       const label = (defaultChannels(state.marketplaceFees)[bestKey]||{}).label || bestKey;
       const authorName = rec.atualizadoPorNome || rec.criadoPorNome || '';
+
+      // variação desde o cadastro anterior (comparando com o mesmo canal, quando existe)
+      const hist = Array.isArray(rec.history) ? rec.history : [];
+      let vsPrevHtml = '<span style="color:var(--muted);">primeiro cadastro</span>';
+      if(hist.length){
+        const prev = hist[hist.length-1];
+        const pdvDelta = savedPdv - prev.pdv;
+        const margemDelta = savedMargem - prev.margemFinal;
+        const pdvCls = pdvDelta>=0?'pos':'neg', margemCls = margemDelta>=0?'pos':'neg';
+        const canalMudou = prev.canal !== bestKey;
+        vsPrevHtml = `<span class="${pdvCls}">${pdvDelta>=0?'+':''}${fmtR$(pdvDelta)}</span> · <span class="${margemCls}">${margemDelta>=0?'+':''}${fmtPct(margemDelta)}</span>`
+          + (canalMudou ? `<div style="color:var(--muted);font-size:10px;">canal mudou de ${prev.canal}</div>` : '');
+      }
+      const hasHistory = hist.length>0;
+      const expanded = expandedHistoryIds.has(rec.id);
+
       html += `<tr>
-        <td><strong>${rec.nome||'(sem nome)'}</strong>${rec.sku?`<div style="color:var(--muted);font-size:10.5px;">${rec.sku}</div>`:''}</td>
+        <td>
+          ${hasHistory?`<button type="button" class="ghost" data-hist-action="toggle" data-id="${rec.id}" style="padding:2px 7px;font-size:10px;margin-right:6px;">${expanded?'▾':'▸'} ${hist.length}</button>`:''}
+          <strong>${rec.nome||'(sem nome)'}</strong>${rec.sku?`<div style="color:var(--muted);font-size:10.5px;">${rec.sku}</div>`:''}
+        </td>
         <td>${rec.fornecedor||'—'}</td>
         <td>${rec.linha||'—'}</td>
         <td>${fmtDate(rec.updatedAt)}${authorName?`<div style="color:var(--muted);font-size:10.5px;">por ${authorName}</div>`:''}</td>
         <td>${label}</td>
         <td>${fmtPct(savedMargem)}</td>
+        <td style="font-size:11.5px;">${vsPrevHtml}</td>
         <td>${hojeMargem==null?'—':fmtPct(hojeMargem)}</td>
         <td class="${deltaCls}">${deltaTxt}</td>
         <td style="white-space:nowrap;">
@@ -1185,6 +1259,24 @@ function renderHistorico(){
           <button class="ghost" data-hist-action="del" data-id="${rec.id}">Excluir</button>
         </td>
       </tr>`;
+
+      if(expanded && hasHistory){
+        const rows = hist.slice().reverse().map(h=>`<tr>
+          <td style="color:var(--muted);">${fmtDate(h.savedAt)}</td>
+          <td>${(defaultChannels(state.marketplaceFees)[h.canal]||{}).label || h.canal}</td>
+          <td>${fmtR$(h.pdv)}</td>
+          <td>${fmtPct(h.margemFinal)}</td>
+        </tr>`).join('');
+        html += `<tr><td colspan="10" style="background:var(--surface-alt);padding:10px 14px;">
+          <div style="font-size:11px;font-weight:600;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em;">Evolução deste produto</div>
+          <table style="width:auto;min-width:360px;"><thead><tr>
+            <th style="text-align:left;font-size:10.5px;color:var(--muted);padding:2px 10px 2px 0;">Data</th>
+            <th style="text-align:left;font-size:10.5px;color:var(--muted);padding:2px 10px;">Canal</th>
+            <th style="text-align:left;font-size:10.5px;color:var(--muted);padding:2px 10px;">PDV</th>
+            <th style="text-align:left;font-size:10.5px;color:var(--muted);padding:2px 10px;">Margem</th>
+          </tr></thead><tbody style="font-size:11.5px;">${rows}</tbody></table>
+        </div></td></tr>`;
+      }
     });
     html += '</tbody>';
     table.innerHTML = html;
@@ -1194,6 +1286,10 @@ function renderHistorico(){
         if(action==='load') loadProductRecord(id);
         else if(action==='dup') duplicateProductRecord(id);
         else if(action==='del') deleteProductRecord(id);
+        else if(action==='toggle'){
+          if(expandedHistoryIds.has(id)) expandedHistoryIds.delete(id); else expandedHistoryIds.add(id);
+          renderHistorico();
+        }
       });
     });
   });
@@ -1359,6 +1455,7 @@ function renderAll(){
   renderPrecificacao();
   renderHistorico();
   renderGmv();
+  renderVisaoGeral();
 }
 
 function moveTabIndicator(btn){
@@ -1415,16 +1512,42 @@ document.getElementById('btnReset').addEventListener('click', ()=>{
 document.getElementById('btnSaveProduct').addEventListener('click', saveProductRecord);
 document.getElementById('btnNewProduct').addEventListener('click', newProductForm);
 document.getElementById('btnConnectCloud').addEventListener('click', reconnectCloud);
-function wireMaskToggle(inputId, btnId){
+const secretFieldRefreshers = [];
+function wireSecretField(inputId, btnId){
   const inp = document.getElementById(inputId), btn = document.getElementById(btnId);
+  function refreshBtn(){
+    if(inp.readOnly){ btn.textContent = 'Alterar'; btn.title = 'Definir um novo valor'; }
+    else { btn.textContent = inp.type==='password' ? '👁' : '🙈'; btn.title = 'Mostrar/ocultar'; }
+  }
   btn.addEventListener('click', ()=>{
-    const showing = inp.type === 'text';
-    inp.type = showing ? 'password' : 'text';
-    btn.textContent = showing ? '👁' : '🙈';
+    if(inp.readOnly){
+      // "Alterar": limpa de vez o valor salvo — a partir daqui só dá pra digitar um novo, nunca reler o antigo.
+      const path = inp.getAttribute('data-bind');
+      setPath(state, path, '');
+      saveState();
+      inp.readOnly = false;
+      inp.value = '';
+      inp.type = 'password';
+      inp.classList.remove('locked-field');
+      inp.focus();
+    } else {
+      inp.type = inp.type==='password' ? 'text' : 'password';
+    }
+    refreshBtn();
   });
+  refreshBtn();
+  secretFieldRefreshers.push(refreshBtn);
 }
-wireMaskToggle('cloud-url', 'btnToggleCloudUrl');
-wireMaskToggle('cloud-password', 'btnToggleCloudPass');
+function refreshSecretFieldButtons(){ secretFieldRefreshers.forEach(fn=>fn()); }
+wireSecretField('cloud-url', 'btnToggleCloudUrl');
+wireSecretField('cloud-password', 'btnToggleCloudPass');
+function goToTab(tabName){
+  const btn = document.querySelector(`nav.tabs button[data-tab="${tabName}"]`);
+  if(btn) btn.click();
+}
+document.getElementById('btnOverviewNewProduct').addEventListener('click', ()=>{ goToTab('precificacao'); newProductForm(); });
+document.getElementById('btnOverviewHistorico').addEventListener('click', ()=>goToTab('historico'));
+document.getElementById('btnOverviewGmv').addEventListener('click', ()=>goToTab('gmv'));
 
 initTabs();
 bindGenericInputs(document);
@@ -1539,6 +1662,8 @@ async function initCloudSync(){
   } else if(sawAnyOk){
     setCloudStatus('cloud');
     hideLockScreen();
+    refreshBoundInputs('[data-bind]'); // trava os campos de URL/senha (nunca reexibe o valor após conectar)
+    refreshSecretFieldButtons();
     startCloudPolling();
   } else {
     setCloudStatus('error');
@@ -1625,12 +1750,104 @@ function initLockScreen(){
   const submit = ()=>{
     state.local.appPassword = inp.value;
     saveState();
-    const passField = document.getElementById('cloud-password');
-    if(passField) passField.value = inp.value;
+    refreshBoundInputs('[data-bind]'); // mantém o campo de senha em Configurações bloqueado (com pontos), nunca mostra o valor digitado aqui
     reconnectCloud();
   };
   btn.addEventListener('click', submit);
   inp.addEventListener('keydown', (e)=>{ if(e.key==='Enter') submit(); });
+}
+/* ===================== VISÃO GERAL ===================== */
+function computeOverviewStats(){
+  const rows = state.products.map(rec=>{
+    const keys = Object.keys(rec.savedResults||{});
+    if(!keys.length) return null;
+    const bestKey = keys.reduce((a,b)=> rec.savedResults[b].margemFinal>rec.savedResults[a].margemFinal?b:a);
+    let margemHoje = rec.savedResults[bestKey].margemFinal;
+    try{
+      const resHoje = computeAll(ctxFromRecord(rec, true));
+      margemHoje = resHoje.channels[bestKey].margemFinal;
+    }catch(e){}
+    return { rec, bestKey, margemHoje };
+  }).filter(Boolean);
+
+  const total = rows.length;
+  const mediaMargem = total ? rows.reduce((s,r)=>s+r.margemHoje,0)/total : 0;
+  const meta = state.fiscal.margemAlvo || 0;
+  const abaixoDaMeta = rows.filter(r=>r.margemHoje < meta).length;
+
+  function agrupa(campo){
+    const grupos = {};
+    rows.forEach(r=>{
+      const chave = r.rec[campo] || '(sem '+(campo==='fornecedor'?'fornecedor':'linha')+')';
+      if(!grupos[chave]) grupos[chave] = { count:0, soma:0 };
+      grupos[chave].count++;
+      grupos[chave].soma += r.margemHoje;
+    });
+    return Object.entries(grupos)
+      .map(([nome,g])=>({ nome, count:g.count, media: g.soma/g.count }))
+      .sort((a,b)=> b.count-a.count)
+      .slice(0,6);
+  }
+
+  const melhores = rows.slice().sort((a,b)=>b.margemHoje-a.margemHoje).slice(0,5);
+  const piores = rows.slice().sort((a,b)=>a.margemHoje-b.margemHoje).slice(0,5);
+
+  return { total, mediaMargem, abaixoDaMeta, porFornecedor: agrupa('fornecedor'), porLinha: agrupa('linha'), melhores, piores };
+}
+
+function latestFilledGmvMonth(){
+  const months = state.gmv.months;
+  for(let i=months.length-1;i>=0;i--){
+    if(months[i].fat!=null){
+      return { label: MONTHS[i], calc: gmvMonthCalc(months[i]) };
+    }
+  }
+  return null;
+}
+
+function renderVisaoGeral(){
+  const stats = computeOverviewStats();
+  const gmvAtual = latestFilledGmvMonth();
+
+  const kpis = [
+    { l:'Produtos no histórico', v: stats.total },
+    { l:'Margem média (hoje)', v: fmtPct(stats.mediaMargem) },
+    { l:'Abaixo da margem alvo', v: stats.abaixoDaMeta + ' de ' + stats.total, warn: stats.abaixoDaMeta>0 },
+  ];
+  if(gmvAtual){
+    kpis.push({ l:'Resultado líquido — '+gmvAtual.label, v: fmtR$(gmvAtual.calc.resultadoLiquido) });
+  }
+  document.getElementById('overview-kpis').innerHTML = kpis.map(k=>
+    `<div class="kpi" ${k.warn?'style="border-left:3px solid var(--neg);"':''}><div class="l">${k.l}</div><div class="v">${k.v}</div></div>`
+  ).join('');
+
+  function rankCard(title, icon, list, emptyMsg){
+    if(!list.length) return `<div class="card"><h2><span class="icon-chip">${icon}</span>${title}</h2><p class="desc">${emptyMsg}</p></div>`;
+    const rows = list.map(r=>{
+      const label = (defaultChannels(state.marketplaceFees)[r.bestKey]||{}).label || r.bestKey;
+      return `<div class="rank-row">
+        <div class="name">${r.rec.nome||'(sem nome)'}<div class="sub">${label}${r.rec.fornecedor?' · '+r.rec.fornecedor:''}</div></div>
+        <strong class="${r.margemHoje>=0?'pos':'neg'}" style="white-space:nowrap;">${fmtPct(r.margemHoje)}</strong>
+      </div>`;
+    }).join('');
+    return `<div class="card"><h2><span class="icon-chip">${icon}</span>${title}</h2>${rows}</div>`;
+  }
+  document.getElementById('overview-rankings').innerHTML =
+    rankCard('Melhores margens (hoje)', '🏆', stats.melhores, 'Salve produtos no Histórico para ver o ranking aqui.') +
+    rankCard('Piores margens (hoje)', '⚠️', stats.piores, 'Salve produtos no Histórico para ver o ranking aqui.');
+
+  function breakdownCard(title, icon, groups, emptyMsg){
+    if(!groups.length) return `<div class="card"><h2><span class="icon-chip">${icon}</span>${title}</h2><p class="desc">${emptyMsg}</p></div>`;
+    const maxCount = Math.max(...groups.map(g=>g.count));
+    const rows = groups.map(g=>`<div class="mini-bar-row">
+      <div class="top"><span class="name">${g.nome}</span><span class="sub">${g.count} produto${g.count!==1?'s':''} · margem média ${fmtPct(g.media)}</span></div>
+      <div class="mini-bar-track"><div class="mini-bar-fill" style="width:${(g.count/maxCount*100).toFixed(0)}%"></div></div>
+    </div>`).join('');
+    return `<div class="card"><h2><span class="icon-chip">${icon}</span>${title}</h2>${rows}</div>`;
+  }
+  document.getElementById('overview-breakdowns').innerHTML =
+    breakdownCard('Por fornecedor', '🏭', stats.porFornecedor, 'Preencha o fornecedor ao salvar produtos para ver essa distribuição.') +
+    breakdownCard('Por linha de produto', '🏷️', stats.porLinha, 'Preencha a linha do produto ao salvar para ver essa distribuição.');
 }
 </script>
 <script>
