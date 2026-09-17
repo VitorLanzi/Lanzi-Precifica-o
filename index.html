@@ -70,25 +70,46 @@ a{color:var(--accent);text-decoration:none;}
 *{transition-property:background-color,border-color,box-shadow,color,transform;transition-duration:.2s;transition-timing-function:var(--ease);}
 input,select,button{transition:all .2s var(--ease);}
 
-/* header — barra translúcida estilo macOS/iOS */
-header.top{
-  display:flex;align-items:center;gap:16px;padding:14px 24px;
-  background:var(--surface-elev);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);
-  border-bottom:.5px solid var(--sep);position:sticky;top:0;z-index:30;flex-wrap:wrap;
+/* ===== estrutura em barra lateral (sidebar), estilo Finder/Ajustes do macOS ===== */
+.app-shell{display:flex;min-height:100vh;align-items:stretch;}
+.sidebar{
+  width:264px;flex-shrink:0;background:var(--surface);border-right:.5px solid var(--sep);
+  display:flex;flex-direction:column;position:sticky;top:0;align-self:flex-start;height:100vh;z-index:40;
 }
-header.top .brand{display:flex;align-items:center;gap:11px;}
-header.top .brand .logo{
-  width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;
-  background:var(--accent);font-size:15px;flex-shrink:0;box-shadow:var(--shadow-sm);
+.sidebar-brand{display:flex;align-items:center;gap:11px;padding:22px 20px 18px;position:relative;}
+.sidebar-brand .logo{
+  width:32px;height:32px;border-radius:9px;background:var(--accent);color:#fff;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:var(--shadow-sm);
 }
-header.top .brand .names{display:flex;flex-direction:column;gap:0;}
-header.top .brand .mark{font-family:var(--sans);font-weight:700;font-size:15px;line-height:1.25;letter-spacing:-.02em;}
-header.top .brand .sub{color:var(--muted);font-size:12px;line-height:1.25;}
-.status-pill{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;font-size:12px;
-  font-weight:590;background:var(--pos-soft);color:var(--pos);margin-left:auto;}
+.sidebar-brand .names{display:flex;flex-direction:column;gap:1px;overflow:hidden;}
+.sidebar-brand .mark{font-family:var(--sans);font-weight:700;font-size:14.5px;letter-spacing:-.02em;white-space:nowrap;}
+.sidebar-brand .sub{color:var(--muted);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sidebar-close{display:none;position:absolute;right:12px;top:16px;padding:6px;}
+
+.sidebar-nav{flex:1;overflow-y:auto;padding:4px 14px;}
+.sidebar-nav-track{position:relative;display:flex;flex-direction:column;gap:2px;}
+.sidebar-nav-track .tab-indicator{
+  position:absolute;left:0;top:0;width:100%;height:0;background:var(--accent-soft);border-radius:9px;
+  transition:transform .38s var(--spring), height .38s var(--spring);z-index:0;
+}
+.sidebar-nav button{
+  position:relative;z-index:1;display:flex;align-items:center;gap:11px;width:100%;text-align:left;
+  background:transparent;border:none;color:var(--muted);font-family:var(--sans);font-weight:590;font-size:13.5px;
+  padding:9px 12px;border-radius:9px;cursor:pointer;
+}
+.sidebar-nav button.active{color:var(--accent);}
+.sidebar-nav button:hover:not(.active){background:var(--surface-alt);color:var(--text);}
+.sidebar-nav button:active{transform:scale(.985);}
+.nav-icon{display:flex;flex-shrink:0;}
+
+.sidebar-footer{padding:14px;border-top:.5px solid var(--sep);display:flex;flex-direction:column;gap:9px;}
+.sidebar-footer-actions{display:flex;gap:6px;}
+.sidebar-footer-actions button{flex:1;display:flex;align-items:center;justify-content:center;padding:9px;}
+.status-pill{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;font-size:11.5px;
+  font-weight:590;background:var(--pos-soft);color:var(--pos);width:fit-content;}
 .status-pill .dot{width:6px;height:6px;border-radius:50%;background:currentColor;animation:pulse 2.2s ease-in-out infinite;}
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.35;}}
-.cloud-pill{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;font-size:11.5px;font-weight:590;}
+.cloud-pill{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;font-size:11px;font-weight:590;width:fit-content;}
 .cloud-pill.cloud-on{background:var(--pos-soft);color:var(--pos);}
 .cloud-pill.cloud-syncing{background:var(--accent-soft);color:var(--accent);}
 .cloud-pill.cloud-off{background:var(--surface-alt);color:var(--muted);}
@@ -99,19 +120,19 @@ button.ghost{
 button.ghost:hover{background:var(--border);}
 button.ghost:active{transform:scale(.96);}
 
-/* tabs — controle segmentado estilo iOS */
-nav.tabs{display:flex;padding:10px 24px;background:var(--surface-elev);backdrop-filter:blur(20px) saturate(180%);
-  -webkit-backdrop-filter:blur(20px) saturate(180%);border-bottom:.5px solid var(--sep);
-  position:sticky;top:58px;z-index:29;overflow-x:auto;}
-.tabs-track{position:relative;display:inline-flex;background:var(--surface-alt);border-radius:12px;padding:3px;gap:0;}
-.tab-indicator{position:absolute;top:3px;left:3px;height:calc(100% - 6px);width:0;background:var(--surface);
-  border-radius:9px;box-shadow:var(--shadow-sm);transition:transform .4s var(--spring),width .4s var(--spring);z-index:0;}
-nav.tabs button{
-  position:relative;z-index:1;font-family:var(--sans);font-weight:590;font-size:13px;background:transparent;border:none;
-  color:var(--muted);padding:7px 15px;cursor:pointer;white-space:nowrap;
+.app-main{flex:1;min-width:0;display:flex;flex-direction:column;}
+.topbar-mobile{display:none;align-items:center;gap:14px;padding:14px 18px;
+  background:var(--surface-elev);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);
+  border-bottom:.5px solid var(--sep);position:sticky;top:0;z-index:30;}
+.sidebar-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:39;}
+.sidebar-backdrop.show{display:block;}
+
+@media (max-width:900px){
+  .sidebar{position:fixed;top:0;left:0;transform:translateX(-100%);transition:transform .32s var(--ease);box-shadow:var(--shadow-lg);}
+  .sidebar.open{transform:translateX(0);}
+  .sidebar-close{display:block;}
+  .topbar-mobile{display:flex;}
 }
-nav.tabs button.active{color:var(--text);}
-nav.tabs button:active{transform:scale(.96);}
 
 main{max-width:1280px;margin:0 auto;padding:32px 24px 80px;}
 section.tab{display:none;}
@@ -249,44 +270,60 @@ input.locked-field{letter-spacing:3px;opacity:.65;cursor:not-allowed;}
 </head>
 <body>
 
-<header class="top">
-  <div id="lockScreen" class="lock-screen">
-    <div class="lock-card">
-      <div class="icon-chip">🔒</div>
-      <h2>Painel protegido</h2>
-      <p class="desc">Digite a senha de acesso à nuvem para continuar sincronizando.</p>
-      <input type="password" id="lock-password" placeholder="Senha">
-      <button class="small-btn" id="btnUnlock">Entrar</button>
-      <p class="hint" id="lock-error" style="color:var(--neg);min-height:14px;"></p>
-    </div>
+<div id="lockScreen" class="lock-screen">
+  <div class="lock-card">
+    <div class="icon-chip"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7.5a4 4 0 0 1 8 0V11"/></svg></div>
+    <h2>Painel protegido</h2>
+    <p class="desc">Digite a senha de acesso à nuvem para continuar sincronizando.</p>
+    <input type="password" id="lock-password" placeholder="Senha">
+    <button class="small-btn" id="btnUnlock">Entrar</button>
+    <p class="hint" id="lock-error" style="color:var(--neg);min-height:14px;"></p>
   </div>
-  <div class="brand">
-    <div class="logo">🧮</div>
-    <div class="names">
-      <span class="mark">Painel Tributário</span>
-      <span class="sub">Lanzi Autoparts &amp; MS Indústria — tapetes automotivos</span>
-    </div>
-  </div>
-  <span class="cloud-pill cloud-off" id="cloudStatus">Somente neste navegador</span>
-  <span class="status-pill" id="statusPill"><span class="dot"></span><span id="statusText">operacional</span></span>
-  <button class="ghost" id="btnThemeToggle" title="Alternar tema claro/escuro">🌙</button>
-  <button class="ghost" id="btnReset">Restaurar padrões</button>
-</header>
+</div>
 
-<nav class="tabs" id="tabNav">
-  <div class="tabs-track" id="tabsTrack">
-    <span class="tab-indicator" id="tabIndicator"></span>
-    <button data-tab="overview" class="active">📈 Visão Geral</button>
-    <button data-tab="config">⚙️ Configurações</button>
-    <button data-tab="icms">🧾 ICMS &amp; DIFAL</button>
-    <button data-tab="marketplaces">🛒 Marketplaces</button>
-    <button data-tab="precificacao">💰 Precificação</button>
-    <button data-tab="historico">🗂️ Histórico</button>
-    <button data-tab="gmv">📊 GMV &amp; Equilíbrio</button>
-  </div>
-</nav>
+<div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
-<main>
+<div class="app-shell">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="logo"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5 4.5 5.5V11c0 5.2 3.4 9 7.5 10.5 4.1-1.5 7.5-5.3 7.5-10.5V5.5L12 2.5Z"/><path d="M8.7 12l2.3 2.3 4.3-4.3"/></svg></div>
+      <div class="names">
+        <span class="mark">Painel Tributário</span>
+        <span class="sub">Lanzi &amp; MS Indústria</span>
+      </div>
+      <button class="ghost sidebar-close" id="btnSidebarClose" aria-label="Fechar menu"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="6" y1="18" x2="18" y2="6"/></svg></button>
+    </div>
+
+    <nav class="sidebar-nav" id="tabNav">
+      <div class="sidebar-nav-track" id="tabsTrack">
+        <span class="tab-indicator" id="tabIndicator"></span>
+        <button data-tab="overview" class="active"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><rect x="5" y="12" width="3" height="8" rx="1"/><rect x="10.5" y="7" width="3" height="13" rx="1"/><rect x="16" y="3" width="3" height="17" rx="1"/></svg></span>Visão Geral</button>
+        <button data-tab="config"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><circle cx="9" cy="6" r="2"/><line x1="4" y1="12" x2="20" y2="12"/><circle cx="15" cy="12" r="2"/><line x1="4" y1="18" x2="20" y2="18"/><circle cx="7" cy="18" r="2"/></svg></span>Configurações</button>
+        <button data-tab="icms"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="8" y1="16" x2="16" y2="8"/><circle cx="8.5" cy="8.5" r="1" fill="currentColor" stroke="none"/><circle cx="15.5" cy="15.5" r="1" fill="currentColor" stroke="none"/></svg></span>ICMS &amp; DIFAL</button>
+        <button data-tab="marketplaces"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h13l-1.5 9.5a2 2 0 0 1-2 1.7H8.7a2 2 0 0 1-2-1.7L5 4H2"/><circle cx="9" cy="21" r="1"/><circle cx="17" cy="21" r="1"/></svg></span>Marketplaces</button>
+        <button data-tab="precificacao"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9 9.3c0-1 1.2-1.8 3-1.8s3 .8 3 1.8-1.2 1.5-3 1.9-3 .9-3 1.9 1.2 1.8 3 1.8 3-.8 3-1.8"/></svg></span>Precificação</button>
+        <button data-tab="historico"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="4" rx="1"/><path d="M5 8v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg></span>Histórico</button>
+        <button data-tab="gmv"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 6h6v6"/></svg></span>GMV &amp; Equilíbrio</button>
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <span class="cloud-pill cloud-off" id="cloudStatus">Somente neste navegador</span>
+      <span class="status-pill" id="statusPill"><span class="dot"></span><span id="statusText">operacional</span></span>
+      <div class="sidebar-footer-actions">
+        <button class="ghost" id="btnThemeToggle" title="Alternar tema claro/escuro"></button>
+        <button class="ghost" id="btnReset" title="Restaurar padrões"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 12a8.5 8.5 0 1 0 2.8-6.3"/><path d="M3.5 4v5h5"/></svg></button>
+      </div>
+    </div>
+  </aside>
+
+  <div class="app-main">
+    <header class="topbar-mobile">
+      <button class="ghost" id="btnSidebarOpen" aria-label="Abrir menu"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg></button>
+      <span class="mark" style="font-size:14px;">Painel Tributário</span>
+    </header>
+
+    <main>
 
 <!-- ===================== TAB: VISÃO GERAL ===================== -->
 <section class="tab active" id="tab-overview">
@@ -294,7 +331,7 @@ input.locked-field{letter-spacing:3px;opacity:.65;cursor:not-allowed;}
   <div class="grid cols-2" id="overview-rankings"></div>
   <div class="grid cols-2" style="margin-top:16px;" id="overview-breakdowns"></div>
   <div class="card" style="margin-top:16px;">
-    <h2><span class="icon-chip">⚡</span>Ações rápidas</h2>
+    <h2><span class="icon-chip"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4.5 14h6l-1 8 9-12h-6l1-8Z"/></svg></span>Ações rápidas</h2>
     <div class="row-inline" style="gap:10px;flex-wrap:wrap;">
       <button class="small-btn" id="btnOverviewNewProduct">+ Novo produto</button>
       <button class="small-btn alt" id="btnOverviewHistorico">Ver histórico completo</button>
@@ -307,7 +344,7 @@ input.locked-field{letter-spacing:3px;opacity:.65;cursor:not-allowed;}
 <section class="tab" id="tab-config">
   <div class="grid cols-2">
     <div class="card">
-      <h2><span class="icon-chip">🏭</span>Armazém e origem fiscal</h2>
+      <h2><span class="icon-chip"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V10.5l5.5 3.5v-3.5L14 14v-3.5l6 3.8V21H3Z"/><line x1="6" y1="21" x2="6" y2="17"/><line x1="12" y1="21" x2="12" y2="17"/><line x1="18" y1="21" x2="18" y2="17"/></svg></span>Armazém e origem fiscal</h2>
       <p class="desc">Define a UF de saída da mercadoria. Alimenta o cálculo de ICMS interestadual e DIFAL em todas as outras abas.</p>
       <div class="field">
         <label>UF de localização do armazém</label>
@@ -315,7 +352,7 @@ input.locked-field{letter-spacing:3px;opacity:.65;cursor:not-allowed;}
       </div>
     </div>
     <div class="card">
-      <h2><span class="icon-chip">📦</span>Custos médios de embalagem</h2>
+      <h2><span class="icon-chip"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8 12 3 3 8l9 5 9-5Z"/><path d="M3 8v9l9 5 9-5V8"/><path d="M12 13v9"/></svg></span>Custos médios de embalagem</h2>
       <p class="desc">Valor médio por pedido. A soma alimenta "Despesas de Envio" no cálculo de cada canal de venda.</p>
       <div class="field"><label>Embalagem (R$/pedido)</label><input type="number" step="0.01" data-bind="config.embalagem" data-tab-recalc="precificacao,gmv"></div>
       <div class="field"><label>Plástico bolha (R$/pedido)</label><input type="number" step="0.01" data-bind="config.bolha" data-tab-recalc="precificacao,gmv"></div>
@@ -328,7 +365,7 @@ input.locked-field{letter-spacing:3px;opacity:.65;cursor:not-allowed;}
   <footer class="note">Estes valores são compartilhados: qualquer alteração aqui atualiza automaticamente o custo de despesas de envio usado na aba Precificação e as sugestões da aba GMV.</footer>
 
   <div class="card" style="margin-top:16px;">
-    <h2><span class="icon-chip">☁️</span>Sincronização em nuvem</h2>
+    <h2><span class="icon-chip"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17 18.5H8a4.5 4.5 0 1 1 1.1-8.87A5.5 5.5 0 0 1 19.8 12 3.5 3.5 0 0 1 17 18.5Z"/></svg></span>Sincronização em nuvem</h2>
     <p class="desc">Conecte a um backend do Google Apps Script (planilha do Google) para que Configurações, Marketplaces, GMV e o Histórico de produtos fiquem compartilhados entre todos que usam este link — em qualquer computador, sem depender de conta do Claude. Deixe em branco para usar o app só neste navegador.</p>
     <div class="callout">🔒 Essa URL (e a senha) funcionam como uma chave mestra do banco de dados. Por isso, depois de salvos, esses dois campos <strong>nunca mais reexibem o valor</strong> — nem para quem configurou. Se precisar conferir ou trocar, clique em "Alterar": isso apaga o valor salvo e libera o campo para digitar um novo (não tem como recuperar o antigo por aqui — anote em um lugar seguro, como um gerenciador de senhas).</div>
     <div class="grid cols-2">
@@ -361,7 +398,7 @@ input.locked-field{letter-spacing:3px;opacity:.65;cursor:not-allowed;}
 <section class="tab" id="tab-icms">
   <div class="grid cols-2">
     <div class="card">
-      <h2><span class="icon-chip">🧾</span>Consulta rápida de alíquota e DIFAL</h2>
+      <h2><span class="icon-chip"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="8" y1="16" x2="16" y2="8"/><circle cx="8.5" cy="8.5" r="1" fill="currentColor" stroke="none"/><circle cx="15.5" cy="15.5" r="1" fill="currentColor" stroke="none"/></svg></span>Consulta rápida de alíquota e DIFAL</h2>
       <p class="desc">Selecione origem e destino para ver a alíquota interestadual, a alíquota interna do destino e o DIFAL resultante.</p>
       <div class="row-inline">
         <div class="field"><label>UF de origem</label><select id="icms-origem"></select></div>
@@ -375,12 +412,12 @@ input.locked-field{letter-spacing:3px;opacity:.65;cursor:not-allowed;}
       <div id="icms-sim-result" class="kpi-strip"></div>
     </div>
     <div class="card">
-      <h2><span class="icon-chip">🔗</span>Como isso alimenta a Precificação</h2>
+      <h2><span class="icon-chip"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 14.5 14.5 9.5"/><path d="M11 6.5l1-1a4 4 0 1 1 5.5 5.5l-1 1"/><path d="M13 17.5l-1 1a4 4 0 1 1-5.5-5.5l1-1"/></svg></span>Como isso alimenta a Precificação</h2>
       <p class="desc">A alíquota de saída (ICMS) e o DIFAL usados na aba Precificação vêm exatamente desta tabela, cruzando a UF do armazém (Configurações) com a UF de destino da venda (definida na Precificação). Você pode sempre sobrepor manualmente lá se tiver um regime especial.</p>
       <div class="callout info">Origem atual configurada: <strong id="icms-origem-atual">—</strong> (aba Configurações)</div>
     </div>
   </div>
-  <h2 style="margin:28px 0 14px;font-size:15px;font-weight:700;display:flex;align-items:center;gap:10px;"><span class="icon-chip">🗺️</span>Tabela completa (alíquotas interestaduais e internas, %)</h2>
+  <h2 style="margin:28px 0 14px;font-size:15px;font-weight:700;display:flex;align-items:center;gap:10px;"><span class="icon-chip"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>Tabela completa (alíquotas interestaduais e internas, %)</h2>
   <div class="matrix-scroll"><table class="matrix" id="icms-matrix"></table></div>
   <footer class="note">A diagonal (destacada) representa a alíquota interna de cada estado. Origem no Sul/Sudeste (exceto ES) para Norte/Nordeste/Centro-Oeste/ES aplica 7%; entre estados do Sul/Sudeste aplica 12%; demais origens aplicam 12% para todos os destinos.</footer>
 </section>
@@ -388,7 +425,7 @@ input.locked-field{letter-spacing:3px;opacity:.65;cursor:not-allowed;}
 <!-- ===================== TAB: MARKETPLACES ===================== -->
 <section class="tab" id="tab-marketplaces">
   <div class="card">
-    <h2><span class="icon-chip">🛒</span>Taxas e fretes por marketplace</h2>
+    <h2><span class="icon-chip"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h13l-1.5 9.5a2 2 0 0 1-2 1.7H8.7a2 2 0 0 1-2-1.7L5 4H2"/><circle cx="9" cy="21" r="1"/><circle cx="17" cy="21" r="1"/></svg></span>Taxas e fretes por marketplace</h2>
     <p class="desc">Valores de referência informados pela operação. Edite livremente — a aba Precificação usa exatamente estes números como taxa de comissão, tarifa fixa e frete médio de cada canal (a Shopee seleciona a faixa automaticamente pelo preço de venda).</p>
     <div class="callout" id="mkt-callout" style="display:none;"></div>
     <table class="fees" id="mkt-table"></table>
@@ -403,7 +440,7 @@ input.locked-field{letter-spacing:3px;opacity:.65;cursor:not-allowed;}
 <!-- ===================== TAB: PRECIFICAÇÃO ===================== -->
 <section class="tab" id="tab-precificacao">
   <div class="card" id="ident-card" style="margin-bottom:16px;">
-    <h2><span class="icon-chip">🏷️</span><span id="ident-title">Identificação do produto</span></h2>
+    <h2><span class="icon-chip"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12a1 1 0 0 1 1 1v16l-7-4-7 4V4a1 1 0 0 1 1-1Z"/></svg></span><span id="ident-title">Identificação do produto</span></h2>
     <p class="desc">Preencha para localizar esta precificação depois no Histórico, por fornecedor ou linha de produto.</p>
     <div class="grid cols-3">
       <div class="field"><label>Nome / descrição do produto</label><input type="text" data-bind="produto.nome" placeholder="ex.: Tapete carpete 5 peças — Onix"></div>
@@ -423,7 +460,7 @@ input.locked-field{letter-spacing:3px;opacity:.65;cursor:not-allowed;}
   <div class="calc-grid">
     <div class="sticky-note">
       <div class="card" style="margin-bottom:14px;">
-        <h2><span class="icon-chip">💰</span>Custo do produto (CMV)</h2>
+        <h2><span class="icon-chip"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9 9.3c0-1 1.2-1.8 3-1.8s3 .8 3 1.8-1.2 1.5-3 1.9-3 .9-3 1.9 1.2 1.8 3 1.8 3-.8 3-1.8"/></svg></span>Custo do produto (CMV)</h2>
         <div class="field"><label>Valor de compra unitário (R$)</label><input type="number" step="0.01" data-bind="produto.valorCompra"></div>
         <div class="field"><label>Frete de compra rateado (R$)</label><input type="number" step="0.01" data-bind="produto.rateioFrete"></div>
         <div class="row-inline">
@@ -438,7 +475,7 @@ input.locked-field{letter-spacing:3px;opacity:.65;cursor:not-allowed;}
       </div>
 
       <div class="card" style="margin-bottom:14px;">
-        <h2><span class="icon-chip">📍</span>Destino e regras fiscais</h2>
+        <h2><span class="icon-chip"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.8 7-12a7 7 0 1 0-14 0c0 5.2 7 12 7 12Z"/><circle cx="12" cy="9" r="2.4"/></svg></span>Destino e regras fiscais</h2>
         <div class="field"><label>UF de destino da venda</label><select id="fiscal-uf-destino" data-bind="fiscal.ufDestino"></select></div>
         <div class="checkline"><input type="checkbox" data-bind="fiscal.considerarDifal" data-bool="true"><label style="margin:0;">Recolher DIFAL na saída</label></div>
         <div class="field"><label>Alíq. FCP do destino (%, opcional)</label><input type="number" step="0.01" data-percent="true" data-bind="fiscal.aliqFcp" placeholder="0"></div>
@@ -452,7 +489,7 @@ input.locked-field{letter-spacing:3px;opacity:.65;cursor:not-allowed;}
       </div>
 
       <div class="card">
-        <h2><span class="icon-chip">🎯</span>Meta de margem</h2>
+        <h2><span class="icon-chip"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="0.8" fill="currentColor" stroke="none"/></svg></span>Meta de margem</h2>
         <div class="field"><label>Margem de contribuição alvo (%)</label><input type="number" step="0.01" data-percent="true" data-bind="fiscal.margemAlvo"></div>
         <div class="checkline"><input type="checkbox" data-bind="fiscal.calcularComSugerido" data-bool="true"><label style="margin:0;">Usar PDV sugerido (em vez do PDV manual) em todos os canais</label></div>
         <p class="hint">Quando ativado, o preço de cada canal é recalculado para entregar exatamente a margem alvo, considerando as taxas daquele canal.</p>
@@ -471,7 +508,7 @@ input.locked-field{letter-spacing:3px;opacity:.65;cursor:not-allowed;}
 <!-- ===================== TAB: HISTÓRICO ===================== -->
 <section class="tab" id="tab-historico">
   <div class="card" style="margin-bottom:16px;">
-    <h2><span class="icon-chip">🔍</span>Buscar precificações salvas</h2>
+    <h2><span class="icon-chip"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.2" y2="16.2"/></svg></span>Buscar precificações salvas</h2>
     <div class="grid cols-3">
       <div class="field"><label>Buscar por nome ou SKU</label><input type="text" id="hist-busca" placeholder="digite para filtrar…"></div>
       <div class="field"><label>Fornecedor</label><select id="hist-fornecedor"><option value="">Todos</option></select></div>
@@ -494,7 +531,7 @@ input.locked-field{letter-spacing:3px;opacity:.65;cursor:not-allowed;}
 <!-- ===================== TAB: GMV ===================== -->
 <section class="tab" id="tab-gmv">
   <div class="card" style="margin-bottom:16px;">
-    <h2><span class="icon-chip">📅</span>Projetar um mês a partir da Precificação</h2>
+    <h2><span class="icon-chip"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="16" rx="2"/><line x1="16" y1="3" x2="16" y2="7"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="3.5" y1="10" x2="20.5" y2="10"/></svg></span>Projetar um mês a partir da Precificação</h2>
     <p class="desc">Escolha um canal já calculado na aba Precificação e uma quantidade média mensal de vendas para preencher automaticamente o mês selecionado abaixo (você pode ajustar os valores depois).</p>
     <div class="row-inline" style="align-items:flex-end;">
       <div class="field"><label>Mês</label><select id="gmv-apply-month"></select></div>
@@ -511,9 +548,48 @@ input.locked-field{letter-spacing:3px;opacity:.65;cursor:not-allowed;}
 </section>
 
 </main>
+  </div>
+</div>
 
 <script id="icms-data" type="application/json">{"AC":{"AC":19,"AL":12,"AM":12,"AP":12,"BA":12,"CE":12,"DF":12,"ES":12,"GO":12,"MA":12,"MG":12,"MS":12,"MT":12,"PA":12,"PB":12,"PE":12,"PI":12,"PR":12,"RJ":12,"RN":12,"RO":12,"RR":12,"RS":12,"SC":12,"SE":12,"SP":12,"TO":12},"AL":{"AC":12,"AL":21.5,"AM":12,"AP":12,"BA":12,"CE":12,"DF":12,"ES":12,"GO":12,"MA":12,"MG":12,"MS":12,"MT":12,"PA":12,"PB":12,"PE":12,"PI":12,"PR":12,"RJ":12,"RN":12,"RO":12,"RR":12,"RS":12,"SC":12,"SE":12,"SP":12,"TO":12},"AM":{"AC":12,"AL":12,"AM":20,"AP":12,"BA":12,"CE":12,"DF":12,"ES":12,"GO":12,"MA":12,"MG":12,"MS":12,"MT":12,"PA":12,"PB":12,"PE":12,"PI":12,"PR":12,"RJ":12,"RN":12,"RO":12,"RR":12,"RS":12,"SC":12,"SE":12,"SP":12,"TO":12},"AP":{"AC":12,"AL":12,"AM":12,"AP":18,"BA":12,"CE":12,"DF":12,"ES":12,"GO":12,"MA":12,"MG":12,"MS":12,"MT":12,"PA":12,"PB":12,"PE":12,"PI":12,"PR":12,"RJ":12,"RN":12,"RO":12,"RR":12,"RS":12,"SC":12,"SE":12,"SP":12,"TO":12},"BA":{"AC":12,"AL":12,"AM":12,"AP":12,"BA":20.5,"CE":12,"DF":12,"ES":12,"GO":12,"MA":12,"MG":12,"MS":12,"MT":12,"PA":12,"PB":12,"PE":12,"PI":12,"PR":12,"RJ":12,"RN":12,"RO":12,"RR":12,"RS":12,"SC":12,"SE":12,"SP":12,"TO":12},"CE":{"AC":12,"AL":12,"AM":12,"AP":12,"BA":12,"CE":20,"DF":12,"ES":12,"GO":12,"MA":12,"MG":12,"MS":12,"MT":12,"PA":12,"PB":12,"PE":12,"PI":12,"PR":12,"RJ":12,"RN":12,"RO":12,"RR":12,"RS":12,"SC":12,"SE":12,"SP":12,"TO":12},"DF":{"AC":12,"AL":12,"AM":12,"AP":12,"BA":12,"CE":12,"DF":20,"ES":12,"GO":12,"MA":12,"MG":12,"MS":12,"MT":12,"PA":12,"PB":12,"PE":12,"PI":12,"PR":12,"RJ":12,"RN":12,"RO":12,"RR":12,"RS":12,"SC":12,"SE":12,"SP":12,"TO":12},"ES":{"AC":12,"AL":12,"AM":12,"AP":12,"BA":12,"CE":12,"DF":12,"ES":17,"GO":12,"MA":12,"MG":12,"MS":12,"MT":12,"PA":12,"PB":12,"PE":12,"PI":12,"PR":12,"RJ":12,"RN":12,"RO":12,"RR":12,"RS":12,"SC":12,"SE":12,"SP":12,"TO":12},"GO":{"AC":12,"AL":12,"AM":12,"AP":12,"BA":12,"CE":12,"DF":12,"ES":12,"GO":19,"MA":12,"MG":12,"MS":12,"MT":12,"PA":12,"PB":12,"PE":12,"PI":12,"PR":12,"RJ":12,"RN":12,"RO":12,"RR":12,"RS":12,"SC":12,"SE":12,"SP":12,"TO":12},"MA":{"AC":12,"AL":12,"AM":12,"AP":12,"BA":12,"CE":12,"DF":12,"ES":12,"GO":12,"MA":23,"MG":12,"MS":12,"MT":12,"PA":12,"PB":12,"PE":12,"PI":12,"PR":12,"RJ":12,"RN":12,"RO":12,"RR":12,"RS":12,"SC":12,"SE":12,"SP":12,"TO":12},"MG":{"AC":7,"AL":7,"AM":7,"AP":7,"BA":7,"CE":7,"DF":7,"ES":7,"GO":7,"MA":7,"MG":18,"MS":7,"MT":7,"PA":7,"PB":7,"PE":7,"PI":7,"PR":12,"RJ":12,"RN":7,"RO":7,"RR":7,"RS":12,"SC":12,"SE":7,"SP":12,"TO":7},"MS":{"AC":12,"AL":12,"AM":12,"AP":12,"BA":12,"CE":12,"DF":12,"ES":12,"GO":12,"MA":12,"MG":12,"MS":17,"MT":12,"PA":12,"PB":12,"PE":12,"PI":12,"PR":12,"RJ":12,"RN":12,"RO":12,"RR":12,"RS":12,"SC":12,"SE":12,"SP":12,"TO":12},"MT":{"AC":12,"AL":12,"AM":12,"AP":12,"BA":12,"CE":12,"DF":12,"ES":12,"GO":12,"MA":12,"MG":12,"MS":12,"MT":17,"PA":12,"PB":12,"PE":12,"PI":12,"PR":12,"RJ":12,"RN":12,"RO":12,"RR":12,"RS":12,"SC":12,"SE":12,"SP":12,"TO":12},"PA":{"AC":12,"AL":12,"AM":12,"AP":12,"BA":12,"CE":12,"DF":12,"ES":12,"GO":12,"MA":12,"MG":12,"MS":12,"MT":12,"PA":19,"PB":12,"PE":12,"PI":12,"PR":12,"RJ":12,"RN":12,"RO":12,"RR":12,"RS":12,"SC":12,"SE":12,"SP":12,"TO":12},"PB":{"AC":12,"AL":12,"AM":12,"AP":12,"BA":12,"CE":12,"DF":12,"ES":12,"GO":12,"MA":12,"MG":12,"MS":12,"MT":12,"PA":12,"PB":20,"PE":12,"PI":12,"PR":12,"RJ":12,"RN":12,"RO":12,"RR":12,"RS":12,"SC":12,"SE":12,"SP":12,"TO":12},"PE":{"AC":12,"AL":12,"AM":12,"AP":12,"BA":12,"CE":12,"DF":12,"ES":12,"GO":12,"MA":12,"MG":12,"MS":12,"MT":12,"PA":12,"PB":12,"PE":20.5,"PI":12,"PR":12,"RJ":12,"RN":12,"RO":12,"RR":12,"RS":12,"SC":12,"SE":12,"SP":12,"TO":12},"PI":{"AC":12,"AL":12,"AM":12,"AP":12,"BA":12,"CE":12,"DF":12,"ES":12,"GO":12,"MA":12,"MG":12,"MS":12,"MT":12,"PA":12,"PB":12,"PE":12,"PI":22.5,"PR":12,"RJ":12,"RN":12,"RO":12,"RR":12,"RS":12,"SC":12,"SE":12,"SP":12,"TO":12},"PR":{"AC":7,"AL":7,"AM":7,"AP":7,"BA":7,"CE":7,"DF":7,"ES":7,"GO":7,"MA":7,"MG":12,"MS":7,"MT":7,"PA":7,"PB":7,"PE":7,"PI":7,"PR":19.5,"RJ":12,"RN":7,"RO":7,"RR":7,"RS":12,"SC":12,"SE":7,"SP":12,"TO":7},"RJ":{"AC":7,"AL":7,"AM":7,"AP":7,"BA":7,"CE":7,"DF":7,"ES":7,"GO":7,"MA":7,"MG":12,"MS":12,"MT":7,"PA":7,"PB":7,"PE":7,"PI":7,"PR":12,"RJ":22,"RN":7,"RO":7,"RR":7,"RS":12,"SC":12,"SE":7,"SP":12,"TO":7},"RN":{"AC":12,"AL":12,"AM":12,"AP":12,"BA":12,"CE":12,"DF":12,"ES":12,"GO":12,"MA":12,"MG":12,"MS":12,"MT":12,"PA":12,"PB":12,"PE":12,"PI":12,"PR":12,"RJ":12,"RN":20,"RO":12,"RR":12,"RS":12,"SC":12,"SE":12,"SP":12,"TO":12},"RO":{"AC":12,"AL":12,"AM":12,"AP":12,"BA":12,"CE":12,"DF":12,"ES":12,"GO":12,"MA":12,"MG":12,"MS":12,"MT":12,"PA":12,"PB":12,"PE":12,"PI":12,"PR":12,"RJ":12,"RN":12,"RO":19.5,"RR":12,"RS":12,"SC":12,"SE":12,"SP":12,"TO":12},"RR":{"AC":12,"AL":12,"AM":12,"AP":12,"BA":12,"CE":12,"DF":12,"ES":12,"GO":12,"MA":12,"MG":12,"MS":12,"MT":12,"PA":12,"PB":12,"PE":12,"PI":12,"PR":12,"RJ":12,"RN":12,"RO":12,"RR":20,"RS":12,"SC":12,"SE":12,"SP":12,"TO":12},"RS":{"AC":7,"AL":7,"AM":7,"AP":7,"BA":7,"CE":7,"DF":7,"ES":7,"GO":7,"MA":7,"MG":12,"MS":7,"MT":7,"PA":7,"PB":7,"PE":7,"PI":7,"PR":12,"RJ":12,"RN":7,"RO":7,"RR":7,"RS":17,"SC":12,"SE":7,"SP":12,"TO":7},"SC":{"AC":7,"AL":7,"AM":7,"AP":7,"BA":7,"CE":7,"DF":7,"ES":7,"GO":7,"MA":7,"MG":12,"MS":7,"MT":7,"PA":7,"PB":7,"PE":7,"PI":7,"PR":12,"RJ":12,"RN":7,"RO":7,"RR":7,"RS":12,"SC":17,"SE":7,"SP":12,"TO":7},"SE":{"AC":12,"AL":12,"AM":12,"AP":12,"BA":12,"CE":12,"DF":12,"ES":12,"GO":12,"MA":12,"MG":12,"MS":12,"MT":12,"PA":12,"PB":12,"PE":12,"PI":12,"PR":12,"RJ":12,"RN":12,"RO":12,"RR":12,"RS":12,"SC":12,"SE":20,"SP":12,"TO":12},"SP":{"AC":7,"AL":7,"AM":7,"AP":7,"BA":7,"CE":7,"DF":7,"ES":7,"GO":7,"MA":7,"MG":12,"MS":7,"MT":7,"PA":7,"PB":7,"PE":7,"PI":7,"PR":12,"RJ":12,"RN":7,"RO":7,"RR":7,"RS":12,"SC":12,"SE":7,"SP":18,"TO":7},"TO":{"AC":12,"AL":12,"AM":12,"AP":12,"BA":12,"CE":12,"DF":12,"ES":12,"GO":12,"MA":12,"MG":12,"MS":12,"MT":12,"PA":12,"PB":12,"PE":12,"PI":12,"PR":12,"RJ":12,"RN":12,"RO":12,"RR":12,"RS":12,"SC":12,"SE":12,"SP":12,"TO":20}}</script>
-<script>/* ===================== DADOS BASE ===================== */
+<script>const ICON_PATHS = {
+  overview: "<path d=\"M3 20h18\"/><rect x=\"5\" y=\"12\" width=\"3\" height=\"8\" rx=\"1\"/><rect x=\"10.5\" y=\"7\" width=\"3\" height=\"13\" rx=\"1\"/><rect x=\"16\" y=\"3\" width=\"3\" height=\"17\" rx=\"1\"/>",
+  settings: "<line x1=\"4\" y1=\"6\" x2=\"20\" y2=\"6\"/><circle cx=\"9\" cy=\"6\" r=\"2\"/><line x1=\"4\" y1=\"12\" x2=\"20\" y2=\"12\"/><circle cx=\"15\" cy=\"12\" r=\"2\"/><line x1=\"4\" y1=\"18\" x2=\"20\" y2=\"18\"/><circle cx=\"7\" cy=\"18\" r=\"2\"/>",
+  percent: "<circle cx=\"12\" cy=\"12\" r=\"9\"/><line x1=\"8\" y1=\"16\" x2=\"16\" y2=\"8\"/><circle cx=\"8.5\" cy=\"8.5\" r=\"1\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"15.5\" cy=\"15.5\" r=\"1\" fill=\"currentColor\" stroke=\"none\"/>",
+  cart: "<path d=\"M6 8h13l-1.5 9.5a2 2 0 0 1-2 1.7H8.7a2 2 0 0 1-2-1.7L5 4H2\"/><circle cx=\"9\" cy=\"21\" r=\"1\"/><circle cx=\"17\" cy=\"21\" r=\"1\"/>",
+  tag: "<path d=\"M20.6 12.6 12.7 20.5a2 2 0 0 1-2.8 0l-7.4-7.4a2 2 0 0 1 0-2.8L10.2 2.4H20.6v10.2Z\"/><circle cx=\"15.5\" cy=\"7.5\" r=\"1.3\" fill=\"currentColor\" stroke=\"none\"/>",
+  coin: "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M9 9.3c0-1 1.2-1.8 3-1.8s3 .8 3 1.8-1.2 1.5-3 1.9-3 .9-3 1.9 1.2 1.8 3 1.8 3-.8 3-1.8\"/>",
+  clock: "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 7.5V12l3 2.5\"/>",
+  archive: "<rect x=\"3\" y=\"4\" width=\"18\" height=\"4\" rx=\"1\"/><path d=\"M5 8v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8\"/><line x1=\"10\" y1=\"12\" x2=\"14\" y2=\"12\"/>",
+  trending: "<path d=\"M3 17l6-6 4 4 8-8\"/><path d=\"M15 6h6v6\"/>",
+  shield: "<path d=\"M12 2.5 4.5 5.5V11c0 5.2 3.4 9 7.5 10.5 4.1-1.5 7.5-5.3 7.5-10.5V5.5L12 2.5Z\"/><path d=\"M8.7 12l2.3 2.3 4.3-4.3\"/>",
+  lock: "<rect x=\"5\" y=\"11\" width=\"14\" height=\"9\" rx=\"2\"/><path d=\"M8 11V7.5a4 4 0 0 1 8 0V11\"/>",
+  cloud: "<path d=\"M17 18.5H8a4.5 4.5 0 1 1 1.1-8.87A5.5 5.5 0 0 1 19.8 12 3.5 3.5 0 0 1 17 18.5Z\"/>",
+  factory: "<path d=\"M3 21V10.5l5.5 3.5v-3.5L14 14v-3.5l6 3.8V21H3Z\"/><line x1=\"6\" y1=\"21\" x2=\"6\" y2=\"17\"/><line x1=\"12\" y1=\"21\" x2=\"12\" y2=\"17\"/><line x1=\"18\" y1=\"21\" x2=\"18\" y2=\"17\"/>",
+  box: "<path d=\"M21 8 12 3 3 8l9 5 9-5Z\"/><path d=\"M3 8v9l9 5 9-5V8\"/><path d=\"M12 13v9\"/>",
+  search: "<circle cx=\"11\" cy=\"11\" r=\"7\"/><line x1=\"21\" y1=\"21\" x2=\"16.2\" y2=\"16.2\"/>",
+  calendar: "<rect x=\"3.5\" y=\"5\" width=\"17\" height=\"16\" rx=\"2\"/><line x1=\"16\" y1=\"3\" x2=\"16\" y2=\"7\"/><line x1=\"8\" y1=\"3\" x2=\"8\" y2=\"7\"/><line x1=\"3.5\" y1=\"10\" x2=\"20.5\" y2=\"10\"/>",
+  trophy: "<path d=\"M8 21h8\"/><path d=\"M12 17v4\"/><path d=\"M7 4h10v4.5a5 5 0 0 1-10 0V4Z\"/><path d=\"M17 5.5h2.5a3 3 0 0 1-3 4.5\"/><path d=\"M7 5.5H4.5a3 3 0 0 0 3 4.5\"/>",
+  alert: "<path d=\"M12 3 2.5 20h19L12 3Z\"/><line x1=\"12\" y1=\"10\" x2=\"12\" y2=\"14.5\"/><circle cx=\"12\" cy=\"17.3\" r=\"0.9\" fill=\"currentColor\" stroke=\"none\"/>",
+  plus: "<line x1=\"12\" y1=\"5\" x2=\"12\" y2=\"19\"/><line x1=\"5\" y1=\"12\" x2=\"19\" y2=\"12\"/>",
+  link: "<path d=\"M9.5 14.5 14.5 9.5\"/><path d=\"M11 6.5l1-1a4 4 0 1 1 5.5 5.5l-1 1\"/><path d=\"M13 17.5l-1 1a4 4 0 1 1-5.5-5.5l1-1\"/>",
+  pin: "<path d=\"M12 21s7-6.8 7-12a7 7 0 1 0-14 0c0 5.2 7 12 7 12Z\"/><circle cx=\"12\" cy=\"9\" r=\"2.4\"/>",
+  target: "<circle cx=\"12\" cy=\"12\" r=\"8.5\"/><circle cx=\"12\" cy=\"12\" r=\"4.5\"/><circle cx=\"12\" cy=\"12\" r=\"0.8\" fill=\"currentColor\" stroke=\"none\"/>",
+  bolt: "<path d=\"M13 2 4.5 14h6l-1 8 9-12h-6l1-8Z\"/>",
+  id: "<path d=\"M6 3h12a1 1 0 0 1 1 1v16l-7-4-7 4V4a1 1 0 0 1 1-1Z\"/>",
+  sun: "<circle cx=\"12\" cy=\"12\" r=\"4\"/><path d=\"M12 2.5v2.2M12 19.3v2.2M4.6 4.6l1.55 1.55M17.85 17.85l1.55 1.55M2.5 12h2.2M19.3 12h2.2M4.6 19.4l1.55-1.55M17.85 6.15l1.55-1.55\"/>",
+  moon: "<path d=\"M20.5 13.2A8.5 8.5 0 1 1 10.8 3.5a6.5 6.5 0 0 0 9.7 9.7Z\"/>",
+  refresh: "<path d=\"M3.5 12a8.5 8.5 0 1 0 2.8-6.3\"/><path d=\"M3.5 4v5h5\"/>",
+  menu: "<line x1=\"4\" y1=\"7\" x2=\"20\" y2=\"7\"/><line x1=\"4\" y1=\"12\" x2=\"20\" y2=\"12\"/><line x1=\"4\" y1=\"17\" x2=\"20\" y2=\"17\"/>",
+  x: "<line x1=\"6\" y1=\"6\" x2=\"18\" y2=\"18\"/><line x1=\"6\" y1=\"18\" x2=\"18\" y2=\"6\"/>",
+  grid: "<rect x=\"3\" y=\"3\" width=\"7\" height=\"7\" rx=\"1\"/><rect x=\"14\" y=\"3\" width=\"7\" height=\"7\" rx=\"1\"/><rect x=\"3\" y=\"14\" width=\"7\" height=\"7\" rx=\"1\"/><rect x=\"14\" y=\"14\" width=\"7\" height=\"7\" rx=\"1\"/>",
+};
+function svgIcon(name, size){
+  size = size || 18;
+  const inner = ICON_PATHS[name] || '';
+  return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${inner}</svg>`;
+}
+/* ===================== DADOS BASE ===================== */
 const ICMS = JSON.parse(document.getElementById('icms-data').textContent);
 const UF_LIST = Object.keys(ICMS).sort();
 const RATES = { pisPct:0.0165, cofinsPct:0.076, pisCofins:0.0925 }; // S18, S19, S10
@@ -1147,7 +1223,7 @@ function loadProductRecord(id){
   saveState();
   refreshBoundInputs('[data-bind]');
   document.getElementById('ident-status').textContent = 'Editando registro salvo em '+fmtDate(rec.updatedAt)+' — salvar substitui esta versão.';
-  const btn = document.querySelector('nav.tabs button[data-tab="precificacao"]');
+  const btn = document.querySelector('.sidebar-nav button[data-tab="precificacao"]');
   if(btn) btn.click();
   renderAll();
 }
@@ -1437,7 +1513,7 @@ function applyTheme(){
   const btn = document.getElementById('btnThemeToggle');
   if(btn){
     const dark = effectiveIsDark();
-    btn.textContent = dark ? '☀️' : '🌙';
+    btn.innerHTML = svgIcon(dark ? 'sun' : 'moon', 17);
     btn.title = dark ? 'Mudar para modo claro' : 'Mudar para modo escuro';
   }
 }
@@ -1464,29 +1540,45 @@ function moveTabIndicator(btn){
   if(!indicator || !track || !btn) return;
   const trackRect = track.getBoundingClientRect();
   const btnRect = btn.getBoundingClientRect();
-  indicator.style.width = btnRect.width + 'px';
-  indicator.style.transform = `translateX(${btnRect.left - trackRect.left - 3}px)`;
+  indicator.style.height = btnRect.height + 'px';
+  indicator.style.transform = `translateY(${btnRect.top - trackRect.top}px)`;
+}
+
+function openSidebar(){
+  document.getElementById('sidebar').classList.add('open');
+  document.getElementById('sidebarBackdrop').classList.add('show');
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarBackdrop').classList.remove('show');
 }
 
 function initTabs(){
   document.getElementById('tabNav').addEventListener('click', e=>{
     const btn = e.target.closest('button[data-tab]');
     if(!btn) return;
-    document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.sidebar-nav button').forEach(b=>b.classList.remove('active'));
     btn.classList.add('active');
     document.querySelectorAll('section.tab').forEach(s=>s.classList.remove('active'));
     document.getElementById('tab-'+btn.getAttribute('data-tab')).classList.add('active');
     moveTabIndicator(btn);
+    closeSidebar(); // no mobile, escolher uma aba já fecha o menu
   });
   window.addEventListener('resize', ()=>{
-    const active = document.querySelector('nav.tabs button.active');
+    const active = document.querySelector('.sidebar-nav button.active');
     if(active) moveTabIndicator(active);
   });
+  const btnOpen = document.getElementById('btnSidebarOpen');
+  const btnClose = document.getElementById('btnSidebarClose');
+  const backdrop = document.getElementById('sidebarBackdrop');
+  if(btnOpen) btnOpen.addEventListener('click', openSidebar);
+  if(btnClose) btnClose.addEventListener('click', closeSidebar);
+  if(backdrop) backdrop.addEventListener('click', closeSidebar);
   // posição inicial (após o layout aplicar as fontes/estilos)
   requestAnimationFrame ? requestAnimationFrame(()=>{
-    const active = document.querySelector('nav.tabs button.active');
+    const active = document.querySelector('.sidebar-nav button.active');
     if(active) moveTabIndicator(active);
-  }) : moveTabIndicator(document.querySelector('nav.tabs button.active'));
+  }) : moveTabIndicator(document.querySelector('.sidebar-nav button.active'));
 }
 
 document.getElementById('btnReset').addEventListener('click', ()=>{
@@ -1542,7 +1634,7 @@ function refreshSecretFieldButtons(){ secretFieldRefreshers.forEach(fn=>fn()); }
 wireSecretField('cloud-url', 'btnToggleCloudUrl');
 wireSecretField('cloud-password', 'btnToggleCloudPass');
 function goToTab(tabName){
-  const btn = document.querySelector(`nav.tabs button[data-tab="${tabName}"]`);
+  const btn = document.querySelector(`.sidebar-nav button[data-tab="${tabName}"]`);
   if(btn) btn.click();
 }
 document.getElementById('btnOverviewNewProduct').addEventListener('click', ()=>{ goToTab('precificacao'); newProductForm(); });
@@ -1833,8 +1925,8 @@ function renderVisaoGeral(){
     return `<div class="card"><h2><span class="icon-chip">${icon}</span>${title}</h2>${rows}</div>`;
   }
   document.getElementById('overview-rankings').innerHTML =
-    rankCard('Melhores margens (hoje)', '🏆', stats.melhores, 'Salve produtos no Histórico para ver o ranking aqui.') +
-    rankCard('Piores margens (hoje)', '⚠️', stats.piores, 'Salve produtos no Histórico para ver o ranking aqui.');
+    rankCard('Melhores margens (hoje)', svgIcon('trophy'), stats.melhores, 'Salve produtos no Histórico para ver o ranking aqui.') +
+    rankCard('Piores margens (hoje)', svgIcon('alert'), stats.piores, 'Salve produtos no Histórico para ver o ranking aqui.');
 
   function breakdownCard(title, icon, groups, emptyMsg){
     if(!groups.length) return `<div class="card"><h2><span class="icon-chip">${icon}</span>${title}</h2><p class="desc">${emptyMsg}</p></div>`;
@@ -1846,8 +1938,8 @@ function renderVisaoGeral(){
     return `<div class="card"><h2><span class="icon-chip">${icon}</span>${title}</h2>${rows}</div>`;
   }
   document.getElementById('overview-breakdowns').innerHTML =
-    breakdownCard('Por fornecedor', '🏭', stats.porFornecedor, 'Preencha o fornecedor ao salvar produtos para ver essa distribuição.') +
-    breakdownCard('Por linha de produto', '🏷️', stats.porLinha, 'Preencha a linha do produto ao salvar para ver essa distribuição.');
+    breakdownCard('Por fornecedor', svgIcon('factory'), stats.porFornecedor, 'Preencha o fornecedor ao salvar produtos para ver essa distribuição.') +
+    breakdownCard('Por linha de produto', svgIcon('tag'), stats.porLinha, 'Preencha a linha do produto ao salvar para ver essa distribuição.');
 }
 </script>
 <script>
