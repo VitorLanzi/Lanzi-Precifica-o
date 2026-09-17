@@ -1,0 +1,2057 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel de Precificação &amp; Tributos — Lanzi / MS Indústria</title>
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#4F46E5">
+<link rel="icon" href="./icon-192.png">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<script>
+(function(){
+  try{
+    var raw = localStorage.getItem('lanzi-precificacao-v1');
+    if(raw){
+      var s = JSON.parse(raw);
+      var t = s.local && s.local.theme;
+      if(t==='light' || t==='dark') document.documentElement.setAttribute('data-theme', t);
+    }
+  }catch(e){}
+})();
+</script>
+<style>
+:root{
+  --bg:#F2F2F7; --surface:#FFFFFF; --surface-alt:#F2F2F7; --surface-elev:rgba(255,255,255,.72);
+  --border:rgba(60,60,67,.13); --sep:rgba(60,60,67,.10);
+  --text:#1C1C1E; --muted:rgba(60,60,67,.6); --muted2:rgba(60,60,67,.42);
+  --accent:#007AFF; --accent-soft:rgba(0,122,255,.12);
+  --pos:#34C759; --pos-soft:rgba(52,199,89,.12); --neg:#FF3B30; --neg-soft:rgba(255,59,48,.12);
+  --radius-lg:20px; --radius-md:14px; --radius-sm:10px;
+  --sans:-apple-system,BlinkMacSystemFont,'SF Pro Text','SF Pro Display','Segoe UI',Inter,Roboto,sans-serif;
+  --mono:'SF Mono',ui-monospace,'IBM Plex Mono',Menlo,Consolas,monospace;
+  --shadow-sm:0 1px 2px rgba(0,0,0,.04),0 1px 1px rgba(0,0,0,.03);
+  --shadow-md:0 4px 16px -4px rgba(0,0,0,.10),0 2px 6px -2px rgba(0,0,0,.06);
+  --shadow-lg:0 16px 40px -12px rgba(0,0,0,.18);
+  --ease:cubic-bezier(.4,0,.2,1); --spring:cubic-bezier(.2,.9,.25,1.05);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#000000; --surface:#1C1C1E; --surface-alt:#2C2C2E; --surface-elev:rgba(28,28,30,.72);
+    --border:rgba(255,255,255,.12); --sep:rgba(255,255,255,.09);
+    --text:#F5F5F7; --muted:rgba(235,235,245,.6); --muted2:rgba(235,235,245,.38);
+    --accent:#0A84FF; --accent-soft:rgba(10,132,255,.18);
+    --pos:#30D158; --pos-soft:rgba(48,209,88,.16); --neg:#FF453A; --neg-soft:rgba(255,69,58,.16);
+    --shadow-sm:0 1px 2px rgba(0,0,0,.5); --shadow-md:0 4px 18px -4px rgba(0,0,0,.55);
+    --shadow-lg:0 20px 48px -14px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#000000; --surface:#1C1C1E; --surface-alt:#2C2C2E; --surface-elev:rgba(28,28,30,.72);
+  --border:rgba(255,255,255,.12); --sep:rgba(255,255,255,.09);
+  --text:#F5F5F7; --muted:rgba(235,235,245,.6); --muted2:rgba(235,235,245,.38);
+  --accent:#0A84FF; --accent-soft:rgba(10,132,255,.18);
+  --pos:#30D158; --pos-soft:rgba(48,209,88,.16); --neg:#FF453A; --neg-soft:rgba(255,69,58,.16);
+  --shadow-sm:0 1px 2px rgba(0,0,0,.5); --shadow-md:0 4px 18px -4px rgba(0,0,0,.55);
+  --shadow-lg:0 20px 48px -14px rgba(0,0,0,.7);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html{scrollbar-color:var(--muted2) transparent;scroll-behavior:smooth;}
+::-webkit-scrollbar{width:9px;height:9px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--muted2);border-radius:999px;border:2px solid transparent;background-clip:padding-box;}
+::-webkit-scrollbar-thumb:hover{background:var(--muted);background-clip:padding-box;}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.47;
+  -webkit-font-smoothing:antialiased;letter-spacing:-.011em;}
+h1,h2,h3{font-family:var(--sans);letter-spacing:-.02em;font-weight:700;}
+table td,table th,input[type=number]{font-variant-numeric:tabular-nums;}
+::selection{background:var(--accent-soft);}
+a{color:var(--accent);text-decoration:none;}
+*{transition-property:background-color,border-color,box-shadow,color,transform;transition-duration:.2s;transition-timing-function:var(--ease);}
+input,select,button{transition:all .2s var(--ease);}
+
+/* ===== estrutura em barra lateral (sidebar), estilo Finder/Ajustes do macOS ===== */
+.app-shell{display:flex;min-height:100vh;align-items:stretch;}
+.sidebar{
+  width:264px;flex-shrink:0;background:var(--surface);border-right:.5px solid var(--sep);
+  display:flex;flex-direction:column;position:sticky;top:0;align-self:flex-start;height:100vh;z-index:40;
+}
+.sidebar-brand{display:flex;align-items:center;gap:11px;padding:22px 20px 18px;position:relative;}
+.sidebar-brand .logo{
+  width:32px;height:32px;border-radius:9px;background:var(--accent);color:#fff;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:var(--shadow-sm);
+}
+.sidebar-brand .names{display:flex;flex-direction:column;gap:1px;overflow:hidden;}
+.sidebar-brand .mark{font-family:var(--sans);font-weight:700;font-size:14.5px;letter-spacing:-.02em;white-space:nowrap;}
+.sidebar-brand .sub{color:var(--muted);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sidebar-close{display:none;position:absolute;right:12px;top:16px;padding:6px;}
+
+.sidebar-nav{flex:1;overflow-y:auto;padding:4px 14px;}
+.sidebar-nav-track{position:relative;display:flex;flex-direction:column;gap:2px;}
+.sidebar-nav-track .tab-indicator{
+  position:absolute;left:0;top:0;width:100%;height:0;background:var(--accent-soft);border-radius:9px;
+  transition:transform .38s var(--spring), height .38s var(--spring);z-index:0;
+}
+.sidebar-nav button{
+  position:relative;z-index:1;display:flex;align-items:center;gap:11px;width:100%;text-align:left;
+  background:transparent;border:none;color:var(--muted);font-family:var(--sans);font-weight:590;font-size:13.5px;
+  padding:9px 12px;border-radius:9px;cursor:pointer;
+}
+.sidebar-nav button.active{color:var(--accent);}
+.sidebar-nav button:hover:not(.active){background:var(--surface-alt);color:var(--text);}
+.sidebar-nav button:active{transform:scale(.985);}
+.nav-icon{display:flex;flex-shrink:0;}
+
+.sidebar-footer{padding:14px;border-top:.5px solid var(--sep);display:flex;flex-direction:column;gap:9px;}
+.sidebar-footer-actions{display:flex;gap:6px;}
+.sidebar-footer-actions button{flex:1;display:flex;align-items:center;justify-content:center;padding:9px;}
+.status-pill{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;font-size:11.5px;
+  font-weight:590;background:var(--pos-soft);color:var(--pos);width:fit-content;}
+.status-pill .dot{width:6px;height:6px;border-radius:50%;background:currentColor;animation:pulse 2.2s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.35;}}
+.cloud-pill{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;font-size:11px;font-weight:590;width:fit-content;}
+.cloud-pill.cloud-on{background:var(--pos-soft);color:var(--pos);}
+.cloud-pill.cloud-syncing{background:var(--accent-soft);color:var(--accent);}
+.cloud-pill.cloud-off{background:var(--surface-alt);color:var(--muted);}
+button.ghost{
+  background:var(--surface-alt);border:none;color:var(--text);border-radius:999px;
+  padding:8px 16px;font-family:var(--sans);font-weight:590;font-size:13px;cursor:pointer;
+}
+button.ghost:hover{background:var(--border);}
+button.ghost:active{transform:scale(.96);}
+
+.app-main{flex:1;min-width:0;display:flex;flex-direction:column;}
+.topbar-mobile{display:none;align-items:center;gap:14px;padding:14px 18px;
+  background:var(--surface-elev);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);
+  border-bottom:.5px solid var(--sep);position:sticky;top:0;z-index:30;}
+.sidebar-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:39;}
+.sidebar-backdrop.show{display:block;}
+
+@media (max-width:900px){
+  .sidebar{position:fixed;top:0;left:0;transform:translateX(-100%);transition:transform .32s var(--ease);box-shadow:var(--shadow-lg);}
+  .sidebar.open{transform:translateX(0);}
+  .sidebar-close{display:block;}
+  .topbar-mobile{display:flex;}
+}
+
+main{max-width:1280px;margin:0 auto;padding:32px 24px 80px;}
+section.tab{display:none;}
+section.tab.active{display:block;animation:fadeSlide .32s var(--spring);}
+@keyframes fadeSlide{from{opacity:0;transform:translateY(6px) scale(.995);}to{opacity:1;transform:translateY(0) scale(1);}}
+
+.grid{display:grid;gap:16px;}
+.grid.cols-2{grid-template-columns:1fr 1fr;}
+.grid.cols-3{grid-template-columns:repeat(3,1fr);}
+@media (max-width:860px){.grid.cols-2,.grid.cols-3{grid-template-columns:1fr;}}
+
+.card{background:var(--surface);border:.5px solid var(--sep);border-radius:var(--radius-lg);padding:22px;
+  box-shadow:var(--shadow-sm);}
+.card h2{font-size:17px;margin:0 0 5px;font-weight:700;letter-spacing:-.02em;display:flex;align-items:center;gap:10px;}
+.icon-chip{width:30px;height:30px;border-radius:9px;background:var(--accent-soft);display:inline-flex;
+  align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.card .desc{color:var(--muted);font-size:13px;margin:0 0 16px;max-width:62ch;line-height:1.5;}
+
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:12.5px;font-weight:590;color:var(--muted);margin-bottom:6px;}
+.field .hint{font-size:11.5px;color:var(--muted);margin-top:5px;}
+input[type=number], input[type=text], select{
+  width:100%;background:var(--surface-alt);border:none;border-radius:var(--radius-sm);
+  color:var(--text);font-family:var(--mono);font-size:14.5px;padding:10px 12px;
+}
+input[type=number]:focus, input[type=text]:focus, select:focus{outline:none;box-shadow:0 0 0 3.5px var(--accent-soft);}
+.row-inline{display:flex;gap:12px;align-items:flex-end;}
+.row-inline > div{flex:1;}
+.suffix-wrap{position:relative;}
+.suffix-wrap .suf{position:absolute;right:9px;top:7px;color:var(--muted);font-size:12px;pointer-events:none;}
+.checkline{display:flex;align-items:center;gap:9px;font-size:14px;color:var(--text);margin-bottom:11px;}
+.checkline input{width:auto;accent-color:var(--accent);transform:scale(1.05);}
+.toggle-yn{display:flex;background:var(--surface-alt);border-radius:var(--radius-sm);overflow:hidden;width:fit-content;padding:2px;}
+.toggle-yn button{background:transparent;border:none;color:var(--muted);padding:6px 15px;font-family:var(--sans);
+  font-weight:590;font-size:12.5px;cursor:pointer;border-radius:8px;}
+.toggle-yn button.on{background:var(--surface);color:var(--text);box-shadow:var(--shadow-sm);}
+
+table{border-collapse:collapse;width:100%;}
+table.matrix th, table.matrix td{border:.5px solid var(--sep);padding:6px 8px;text-align:right;font-size:11.5px;
+  font-family:var(--mono);}
+table.matrix th{background:var(--surface-alt);position:sticky;top:0;font-family:var(--sans);font-weight:700;font-size:11px;}
+table.matrix td.diag{background:var(--accent-soft);font-weight:700;color:var(--accent);}
+table.matrix th.rowhead, table.matrix td.rowhead{position:sticky;left:0;background:var(--surface-alt);text-align:left;
+  font-weight:700;font-family:var(--sans);font-size:11.5px;}
+table.matrix tbody tr:hover td{background:var(--surface-alt);}
+table.matrix tbody tr:hover td.diag{background:var(--accent-soft);}
+.matrix-scroll{max-height:480px;overflow:auto;border:.5px solid var(--sep);border-radius:var(--radius-md);}
+
+table.fees{width:100%;border-collapse:collapse;}
+table.fees th{text-align:left;font-size:11px;color:var(--muted);font-weight:700;padding:10px 10px;border-bottom:.5px solid var(--sep);
+  text-transform:uppercase;letter-spacing:.04em;}
+table.fees td{padding:9px 10px;border-bottom:.5px solid var(--sep);vertical-align:middle;font-size:13.5px;}
+table.fees tbody tr:hover{background:var(--surface-alt);}
+table.fees td input, table.fees td select{padding:6px 9px;font-size:12.5px;}
+table.fees tr:last-child td{border-bottom:none;}
+.tag{display:inline-block;font-size:10.5px;font-weight:590;padding:3px 9px;border-radius:999px;background:var(--surface-alt);
+  color:var(--muted);}
+
+.calc-grid{display:grid;grid-template-columns:360px 1fr;gap:18px;align-items:start;}
+@media (max-width:1080px){.calc-grid{grid-template-columns:1fr;}}
+.sticky-note{position:sticky;top:132px;display:flex;flex-direction:column;gap:16px;}
+
+table.chan{width:100%;border-collapse:collapse;min-width:960px;}
+table.chan th{font-family:var(--sans);font-weight:700;font-size:12.5px;padding:11px 10px;text-align:right;
+  border-bottom:1px solid var(--sep);white-space:nowrap;background:var(--surface);position:sticky;top:0;}
+table.chan th:first-child{text-align:left;}
+table.chan td{padding:7px 10px;text-align:right;border-bottom:.5px solid var(--sep);white-space:nowrap;
+  font-family:var(--mono);font-size:12.5px;}
+table.chan td:first-child{text-align:left;color:var(--muted);font-size:12px;font-family:var(--sans);font-weight:500;}
+table.chan tbody tr:not(.section-head):hover td{background:var(--surface-alt);}
+table.chan tr.section-head td{padding-top:18px;font-weight:700;color:var(--accent);font-size:10.5px;font-family:var(--sans);
+  text-transform:uppercase;letter-spacing:.06em;border-bottom:.5px solid var(--sep);background:transparent;}
+table.chan td input, table.chan td select{width:92px;text-align:right;padding:5px 8px;font-size:12px;}
+table.chan td select{width:auto;text-align:left;}
+table.chan tr.result-row{background:var(--surface-alt);}
+table.chan tr.result-row td{font-weight:700;}
+table.chan td.pos{color:var(--pos);}
+table.chan td.neg{color:var(--neg);}
+.chan-scroll{overflow-x:auto;border:.5px solid var(--sep);border-radius:var(--radius-md);padding:0 4px;}
+
+.kpi-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin:16px 0 24px;}
+.kpi{background:var(--surface);border:.5px solid var(--sep);border-radius:var(--radius-md);padding:14px 16px;
+  box-shadow:var(--shadow-sm);}
+.kpi:hover{transform:translateY(-2px);box-shadow:var(--shadow-md);}
+.kpi .l{font-size:11.5px;color:var(--muted);font-weight:590;}
+.kpi .v{font-family:var(--sans);font-size:21px;font-weight:700;margin-top:4px;letter-spacing:-.02em;}
+
+.gmv-scroll{overflow-x:auto;border:.5px solid var(--sep);border-radius:var(--radius-md);}
+table.gmv{border-collapse:collapse;min-width:1500px;width:100%;}
+table.gmv th{font-family:var(--sans);font-weight:700;font-size:12px;padding:9px 8px;text-align:right;
+  border-bottom:1px solid var(--sep);background:var(--surface);position:sticky;top:0;}
+table.gmv th:first-child{text-align:left;position:sticky;left:0;z-index:2;min-width:215px;}
+table.gmv td{padding:6px 8px;text-align:right;border-bottom:.5px solid var(--sep);font-family:var(--mono);font-size:11.5px;}
+table.gmv tbody tr:hover td{background:var(--surface-alt);}
+table.gmv td:first-child{text-align:left;color:var(--muted);font-size:11.5px;font-family:var(--sans);position:sticky;left:0;
+  background:var(--surface);min-width:215px;}
+table.gmv tbody tr:hover td:first-child{background:var(--surface-alt);}
+table.gmv td input{width:88px;text-align:right;padding:4px 6px;font-size:11.5px;}
+table.gmv tr.result{background:var(--surface-alt);}
+table.gmv tr.result td{font-weight:700;}
+table.gmv tr.sep td{border-bottom:none;height:8px;padding:0;background:transparent;}
+
+footer.note{color:var(--muted);font-size:12px;margin-top:28px;max-width:80ch;line-height:1.6;}
+.empty-state{display:none;flex-direction:column;align-items:center;text-align:center;gap:10px;
+  padding:52px 20px;background:var(--surface-alt);border-radius:var(--radius-lg);color:var(--muted);}
+.empty-state .icon{font-size:32px;}
+.empty-state strong{color:var(--text);font-size:15px;font-weight:700;}
+.small-btn{background:var(--accent);color:#fff;border:none;border-radius:999px;padding:9px 18px;font-family:var(--sans);
+  font-weight:600;font-size:13px;cursor:pointer;box-shadow:var(--shadow-sm);}
+.small-btn.alt{background:var(--surface-alt);color:var(--accent);}
+.small-btn:hover{filter:brightness(1.06);}
+.small-btn:active{transform:scale(.96);}
+.callout{background:var(--neg-soft);color:var(--neg);border-radius:var(--radius-md);
+  padding:12px 15px;font-size:12.5px;margin-bottom:16px;line-height:1.55;}
+.callout.info{background:var(--accent-soft);color:var(--accent);}
+.lock-screen{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  z-index:200;display:none;align-items:center;justify-content:center;padding:20px;}
+.lock-card{background:var(--surface);border-radius:var(--radius-lg);padding:32px 28px;max-width:360px;width:100%;
+  text-align:center;box-shadow:var(--shadow-lg);}
+.lock-card .icon-chip{width:46px;height:46px;font-size:22px;margin:0 auto 14px;}
+.lock-card h2{justify-content:center;font-size:17px;margin-bottom:6px;}
+.lock-card input{margin:14px 0 6px;text-align:center;}
+.lock-card .small-btn{width:100%;margin-top:8px;}
+input.locked-field{letter-spacing:3px;opacity:.65;cursor:not-allowed;}
+.rank-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--sep);font-size:13px;}
+.rank-row:last-child{border-bottom:none;}
+.rank-row .name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.rank-row .sub{color:var(--muted);font-size:11px;}
+.mini-bar-row{margin-bottom:12px;}
+.mini-bar-row .top{display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px;}
+.mini-bar-row .top .name{font-weight:600;}
+.mini-bar-track{height:7px;background:var(--surface-alt);border-radius:999px;overflow:hidden;}
+.mini-bar-fill{height:100%;background:var(--accent);border-radius:999px;}
+</style>
+</head>
+<body>
+
+<div id="lockScreen" class="lock-screen">
+  <div class="lock-card">
+    <div class="icon-chip"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7.5a4 4 0 0 1 8 0V11"/></svg></div>
+    <h2>Painel protegido</h2>
+    <p class="desc">Digite a senha de acesso à nuvem para continuar sincronizando.</p>
+    <input type="password" id="lock-password" placeholder="Senha">
+    <button class="small-btn" id="btnUnlock">Entrar</button>
+    <p class="hint" id="lock-error" style="color:var(--neg);min-height:14px;"></p>
+  </div>
+</div>
+
+<div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+<div class="app-shell">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="logo"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5 4.5 5.5V11c0 5.2 3.4 9 7.5 10.5 4.1-1.5 7.5-5.3 7.5-10.5V5.5L12 2.5Z"/><path d="M8.7 12l2.3 2.3 4.3-4.3"/></svg></div>
+      <div class="names">
+        <span class="mark">Painel Tributário</span>
+        <span class="sub">Lanzi &amp; MS Indústria</span>
+      </div>
+      <button class="ghost sidebar-close" id="btnSidebarClose" aria-label="Fechar menu"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="6" y1="18" x2="18" y2="6"/></svg></button>
+    </div>
+
+    <nav class="sidebar-nav" id="tabNav">
+      <div class="sidebar-nav-track" id="tabsTrack">
+        <span class="tab-indicator" id="tabIndicator"></span>
+        <button data-tab="overview" class="active"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><rect x="5" y="12" width="3" height="8" rx="1"/><rect x="10.5" y="7" width="3" height="13" rx="1"/><rect x="16" y="3" width="3" height="17" rx="1"/></svg></span>Visão Geral</button>
+        <button data-tab="config"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><circle cx="9" cy="6" r="2"/><line x1="4" y1="12" x2="20" y2="12"/><circle cx="15" cy="12" r="2"/><line x1="4" y1="18" x2="20" y2="18"/><circle cx="7" cy="18" r="2"/></svg></span>Configurações</button>
+        <button data-tab="icms"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="8" y1="16" x2="16" y2="8"/><circle cx="8.5" cy="8.5" r="1" fill="currentColor" stroke="none"/><circle cx="15.5" cy="15.5" r="1" fill="currentColor" stroke="none"/></svg></span>ICMS &amp; DIFAL</button>
+        <button data-tab="marketplaces"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h13l-1.5 9.5a2 2 0 0 1-2 1.7H8.7a2 2 0 0 1-2-1.7L5 4H2"/><circle cx="9" cy="21" r="1"/><circle cx="17" cy="21" r="1"/></svg></span>Marketplaces</button>
+        <button data-tab="precificacao"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9 9.3c0-1 1.2-1.8 3-1.8s3 .8 3 1.8-1.2 1.5-3 1.9-3 .9-3 1.9 1.2 1.8 3 1.8 3-.8 3-1.8"/></svg></span>Precificação</button>
+        <button data-tab="historico"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="4" rx="1"/><path d="M5 8v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg></span>Histórico</button>
+        <button data-tab="gmv"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 6h6v6"/></svg></span>GMV &amp; Equilíbrio</button>
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <span class="cloud-pill cloud-off" id="cloudStatus">Somente neste navegador</span>
+      <span class="status-pill" id="statusPill"><span class="dot"></span><span id="statusText">operacional</span></span>
+      <div class="sidebar-footer-actions">
+        <button class="ghost" id="btnThemeToggle" title="Alternar tema claro/escuro"></button>
+        <button class="ghost" id="btnReset" title="Restaurar padrões"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 12a8.5 8.5 0 1 0 2.8-6.3"/><path d="M3.5 4v5h5"/></svg></button>
+      </div>
+    </div>
+  </aside>
+
+  <div class="app-main">
+    <header class="topbar-mobile">
+      <button class="ghost" id="btnSidebarOpen" aria-label="Abrir menu"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg></button>
+      <span class="mark" style="font-size:14px;">Painel Tributário</span>
+    </header>
+
+    <main>
+
+<!-- ===================== TAB: VISÃO GERAL ===================== -->
+<section class="tab active" id="tab-overview">
+  <div class="kpi-strip" id="overview-kpis"></div>
+  <div class="grid cols-2" id="overview-rankings"></div>
+  <div class="grid cols-2" style="margin-top:16px;" id="overview-breakdowns"></div>
+  <div class="card" style="margin-top:16px;">
+    <h2><span class="icon-chip"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4.5 14h6l-1 8 9-12h-6l1-8Z"/></svg></span>Ações rápidas</h2>
+    <div class="row-inline" style="gap:10px;flex-wrap:wrap;">
+      <button class="small-btn" id="btnOverviewNewProduct">+ Novo produto</button>
+      <button class="small-btn alt" id="btnOverviewHistorico">Ver histórico completo</button>
+      <button class="small-btn alt" id="btnOverviewGmv">Ver GMV &amp; Equilíbrio</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== TAB: CONFIG ===================== -->
+<section class="tab" id="tab-config">
+  <div class="grid cols-2">
+    <div class="card">
+      <h2><span class="icon-chip"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V10.5l5.5 3.5v-3.5L14 14v-3.5l6 3.8V21H3Z"/><line x1="6" y1="21" x2="6" y2="17"/><line x1="12" y1="21" x2="12" y2="17"/><line x1="18" y1="21" x2="18" y2="17"/></svg></span>Armazém e origem fiscal</h2>
+      <p class="desc">Define a UF de saída da mercadoria. Alimenta o cálculo de ICMS interestadual e DIFAL em todas as outras abas.</p>
+      <div class="field">
+        <label>UF de localização do armazém</label>
+        <select id="cfg-uf" data-bind="config.ufArmazem"></select>
+      </div>
+    </div>
+    <div class="card">
+      <h2><span class="icon-chip"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8 12 3 3 8l9 5 9-5Z"/><path d="M3 8v9l9 5 9-5V8"/><path d="M12 13v9"/></svg></span>Custos médios de embalagem</h2>
+      <p class="desc">Valor médio por pedido. A soma alimenta "Despesas de Envio" no cálculo de cada canal de venda.</p>
+      <div class="field"><label>Embalagem (R$/pedido)</label><input type="number" step="0.01" data-bind="config.embalagem" data-tab-recalc="precificacao,gmv"></div>
+      <div class="field"><label>Plástico bolha (R$/pedido)</label><input type="number" step="0.01" data-bind="config.bolha" data-tab-recalc="precificacao,gmv"></div>
+      <div class="field"><label>Etiquetas (R$/pedido)</label><input type="number" step="0.01" data-bind="config.etiqueta" data-tab-recalc="precificacao,gmv"></div>
+      <div class="field"><label>Brindes (R$/pedido)</label><input type="number" step="0.01" data-bind="config.brinde" data-tab-recalc="precificacao,gmv"></div>
+      <div class="field"><label>Publicidade (R$/pedido)</label><input type="number" step="0.01" data-bind="config.publicidade" data-tab-recalc="precificacao,gmv"></div>
+      <div id="cfg-pack-total" class="hint"></div>
+    </div>
+  </div>
+  <footer class="note">Estes valores são compartilhados: qualquer alteração aqui atualiza automaticamente o custo de despesas de envio usado na aba Precificação e as sugestões da aba GMV.</footer>
+
+  <div class="card" style="margin-top:16px;">
+    <h2><span class="icon-chip"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17 18.5H8a4.5 4.5 0 1 1 1.1-8.87A5.5 5.5 0 0 1 19.8 12 3.5 3.5 0 0 1 17 18.5Z"/></svg></span>Sincronização em nuvem</h2>
+    <p class="desc">Conecte a um backend do Google Apps Script (planilha do Google) para que Configurações, Marketplaces, GMV e o Histórico de produtos fiquem compartilhados entre todos que usam este link — em qualquer computador, sem depender de conta do Claude. Deixe em branco para usar o app só neste navegador.</p>
+    <div class="callout">🔒 Essa URL (e a senha) funcionam como uma chave mestra do banco de dados. Por isso, depois de salvos, esses dois campos <strong>nunca mais reexibem o valor</strong> — nem para quem configurou. Se precisar conferir ou trocar, clique em "Alterar": isso apaga o valor salvo e libera o campo para digitar um novo (não tem como recuperar o antigo por aqui — anote em um lugar seguro, como um gerenciador de senhas).</div>
+    <div class="grid cols-2">
+      <div class="field">
+        <label>URL do Web App do Google Apps Script</label>
+        <div class="row-inline" style="gap:6px;">
+          <div style="flex:1;"><input type="password" autocomplete="off" id="cloud-url" data-bind="local.cloudUrl" data-writeonly="true" placeholder="https://script.google.com/macros/s/AAAA.../exec"></div>
+          <button type="button" class="ghost" id="btnToggleCloudUrl" style="flex:0;">Alterar</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>Senha de acesso à nuvem</label>
+        <div class="row-inline" style="gap:6px;">
+          <div style="flex:1;"><input type="password" autocomplete="new-password" id="cloud-password" data-bind="local.appPassword" data-writeonly="true" placeholder="defina ou digite a senha combinada com a equipe"></div>
+          <button type="button" class="ghost" id="btnToggleCloudPass" style="flex:0;">Alterar</button>
+        </div>
+        <p class="hint">A primeira pessoa a conectar com uma senha nova a define para todo mundo daí em diante.</p>
+      </div>
+    </div>
+    <div class="field">
+      <label>Seu nome (aparece como autor no Histórico)</label>
+      <input type="text" id="cloud-username" data-bind="local.userName" placeholder="ex.: Carla, financeiro">
+    </div>
+    <button class="small-btn" id="btnConnectCloud">Conectar / atualizar agora</button>
+    <p class="hint" style="margin-top:8px;">Veja o passo a passo de como criar a planilha e publicar o backend nas instruções que acompanham este arquivo.</p>
+  </div>
+</section>
+
+<!-- ===================== TAB: ICMS ===================== -->
+<section class="tab" id="tab-icms">
+  <div class="grid cols-2">
+    <div class="card">
+      <h2><span class="icon-chip"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="8" y1="16" x2="16" y2="8"/><circle cx="8.5" cy="8.5" r="1" fill="currentColor" stroke="none"/><circle cx="15.5" cy="15.5" r="1" fill="currentColor" stroke="none"/></svg></span>Consulta rápida de alíquota e DIFAL</h2>
+      <p class="desc">Selecione origem e destino para ver a alíquota interestadual, a alíquota interna do destino e o DIFAL resultante.</p>
+      <div class="row-inline">
+        <div class="field"><label>UF de origem</label><select id="icms-origem"></select></div>
+        <div class="field"><label>UF de destino</label><select id="icms-destino"></select></div>
+      </div>
+      <div id="icms-result" class="kpi-strip"></div>
+      <div class="field" style="margin-top:6px;">
+        <label>Valor simulado da mercadoria (R$)</label>
+        <input type="number" id="icms-sim-valor" step="0.01" value="1000">
+      </div>
+      <div id="icms-sim-result" class="kpi-strip"></div>
+    </div>
+    <div class="card">
+      <h2><span class="icon-chip"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 14.5 14.5 9.5"/><path d="M11 6.5l1-1a4 4 0 1 1 5.5 5.5l-1 1"/><path d="M13 17.5l-1 1a4 4 0 1 1-5.5-5.5l1-1"/></svg></span>Como isso alimenta a Precificação</h2>
+      <p class="desc">A alíquota de saída (ICMS) e o DIFAL usados na aba Precificação vêm exatamente desta tabela, cruzando a UF do armazém (Configurações) com a UF de destino da venda (definida na Precificação). Você pode sempre sobrepor manualmente lá se tiver um regime especial.</p>
+      <div class="callout info">Origem atual configurada: <strong id="icms-origem-atual">—</strong> (aba Configurações)</div>
+    </div>
+  </div>
+  <h2 style="margin:28px 0 14px;font-size:15px;font-weight:700;display:flex;align-items:center;gap:10px;"><span class="icon-chip"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>Tabela completa (alíquotas interestaduais e internas, %)</h2>
+  <div class="matrix-scroll"><table class="matrix" id="icms-matrix"></table></div>
+  <footer class="note">A diagonal (destacada) representa a alíquota interna de cada estado. Origem no Sul/Sudeste (exceto ES) para Norte/Nordeste/Centro-Oeste/ES aplica 7%; entre estados do Sul/Sudeste aplica 12%; demais origens aplicam 12% para todos os destinos.</footer>
+</section>
+
+<!-- ===================== TAB: MARKETPLACES ===================== -->
+<section class="tab" id="tab-marketplaces">
+  <div class="card">
+    <h2><span class="icon-chip"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h13l-1.5 9.5a2 2 0 0 1-2 1.7H8.7a2 2 0 0 1-2-1.7L5 4H2"/><circle cx="9" cy="21" r="1"/><circle cx="17" cy="21" r="1"/></svg></span>Taxas e fretes por marketplace</h2>
+    <p class="desc">Valores de referência informados pela operação. Edite livremente — a aba Precificação usa exatamente estes números como taxa de comissão, tarifa fixa e frete médio de cada canal (a Shopee seleciona a faixa automaticamente pelo preço de venda).</p>
+    <div class="callout" id="mkt-callout" style="display:none;"></div>
+    <table class="fees" id="mkt-table"></table>
+  </div>
+  <div style="margin-top:14px;">
+    <button class="small-btn" id="btnApplyFees">Aplicar estas taxas à Precificação</button>
+    <span class="hint" style="margin-left:10px;">Também aplicadas automaticamente sempre que você editar um valor aqui.</span>
+  </div>
+  <footer class="note">Faixas da Shopee: até R$79,99 → 20%+R$4 · R$80–99,99 → 14%+R$16 (Pix 5%) · R$100–199,99 → 14%+R$20 (Pix 5%) · R$200–499,99 → 14%+R$26 (Pix 5%) · acima de R$500 → 14%+R$26 (Pix até 8%). O subsídio Pix é informativo e não reduz a comissão no cálculo de margem.</footer>
+</section>
+
+<!-- ===================== TAB: PRECIFICAÇÃO ===================== -->
+<section class="tab" id="tab-precificacao">
+  <div class="card" id="ident-card" style="margin-bottom:16px;">
+    <h2><span class="icon-chip"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12a1 1 0 0 1 1 1v16l-7-4-7 4V4a1 1 0 0 1 1-1Z"/></svg></span><span id="ident-title">Identificação do produto</span></h2>
+    <p class="desc">Preencha para localizar esta precificação depois no Histórico, por fornecedor ou linha de produto.</p>
+    <div class="grid cols-3">
+      <div class="field"><label>Nome / descrição do produto</label><input type="text" data-bind="produto.nome" placeholder="ex.: Tapete carpete 5 peças — Onix"></div>
+      <div class="field"><label>SKU / código</label><input type="text" data-bind="produto.sku" placeholder="ex.: TC-ONX-001"></div>
+      <div class="field"><label>Fornecedor</label><input type="text" data-bind="produto.fornecedor" list="dl-fornecedores" placeholder="ex.: MS Indústria"><datalist id="dl-fornecedores"></datalist></div>
+    </div>
+    <div class="grid cols-3">
+      <div class="field"><label>Linha do produto</label><input type="text" data-bind="produto.linha" list="dl-linhas" placeholder="ex.: Automotivo — Carpete"><datalist id="dl-linhas"></datalist></div>
+    </div>
+    <div class="row-inline" style="margin-top:4px;">
+      <button class="small-btn" id="btnSaveProduct">Salvar no histórico</button>
+      <button class="small-btn alt" id="btnNewProduct">Novo produto (limpar formulário)</button>
+      <span class="hint" id="ident-status" style="margin-left:6px;"></span>
+    </div>
+  </div>
+  <div class="kpi-strip" id="preco-kpis"></div>
+  <div class="calc-grid">
+    <div class="sticky-note">
+      <div class="card" style="margin-bottom:14px;">
+        <h2><span class="icon-chip"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9 9.3c0-1 1.2-1.8 3-1.8s3 .8 3 1.8-1.2 1.5-3 1.9-3 .9-3 1.9 1.2 1.8 3 1.8 3-.8 3-1.8"/></svg></span>Custo do produto (CMV)</h2>
+        <div class="field"><label>Valor de compra unitário (R$)</label><input type="number" step="0.01" data-bind="produto.valorCompra"></div>
+        <div class="field"><label>Frete de compra rateado (R$)</label><input type="number" step="0.01" data-bind="produto.rateioFrete"></div>
+        <div class="row-inline">
+          <div class="field"><label>Alíq. ICMS compra (%)</label><input type="number" step="0.01" data-percent="true" data-bind="produto.aliqIcms"></div>
+          <div class="field"><label>Alíq. ICMS-ST (%)</label><input type="number" step="0.01" data-percent="true" data-bind="produto.aliqIcmsST"></div>
+        </div>
+        <div class="field"><label>Alíq. IPI (%)</label><input type="number" step="0.01" data-percent="true" data-bind="produto.aliqIpi"></div>
+        <div class="field"><label>Regime do fornecedor</label>
+          <select data-bind="fiscal.regimeFornecedor"><option>Regime Normal</option><option>Simples Nacional</option></select>
+        </div>
+        <div class="field"><label>CMV manual — ignora o cálculo acima (R$, opcional)</label><input type="number" step="0.01" data-bind="produto.cmvManual" placeholder="deixe em branco para calcular"></div>
+      </div>
+
+      <div class="card" style="margin-bottom:14px;">
+        <h2><span class="icon-chip"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.8 7-12a7 7 0 1 0-14 0c0 5.2 7 12 7 12Z"/><circle cx="12" cy="9" r="2.4"/></svg></span>Destino e regras fiscais</h2>
+        <div class="field"><label>UF de destino da venda</label><select id="fiscal-uf-destino" data-bind="fiscal.ufDestino"></select></div>
+        <div class="checkline"><input type="checkbox" data-bind="fiscal.considerarDifal" data-bool="true"><label style="margin:0;">Recolher DIFAL na saída</label></div>
+        <div class="field"><label>Alíq. FCP do destino (%, opcional)</label><input type="number" step="0.01" data-percent="true" data-bind="fiscal.aliqFcp" placeholder="0"></div>
+        <div class="field"><label>Alíq. ICMS de saída manual (%, sobrepõe a tabela)</label><input type="number" step="0.01" data-percent="true" data-bind="fiscal.aliqIcmsManual" placeholder="usar tabela"></div>
+        <div class="checkline"><input type="checkbox" data-bind="fiscal.beneficioCredPresumido" data-bool="true"><label style="margin:0;">Benefício fiscal de crédito presumido (75% do ICMS)</label></div>
+        <div class="checkline"><input type="checkbox" data-bind="fiscal.incentivoRetirarBase" data-bool="true"><label style="margin:0;">Retirar ICMS/PIS/COFINS da base de PIS/COFINS</label></div>
+        <div class="checkline"><input type="checkbox" data-bind="fiscal.teseCreditarComissao" data-bool="true"><label style="margin:0;">Creditar PIS/COFINS sobre comissão</label></div>
+        <div class="checkline"><input type="checkbox" data-bind="fiscal.teseCreditarFrete" data-bool="true"><label style="margin:0;">Creditar PIS/COFINS/ICMS sobre frete</label></div>
+        <div class="checkline"><input type="checkbox" data-bind="fiscal.monofasico" data-bool="true"><label style="margin:0;">Item monofásico (isento de PIS/COFINS na venda)</label></div>
+        <div class="field"><label>Taxa de devolução do produto (%)</label><input type="number" step="0.01" data-percent="true" data-bind="devolucao.taxaDevolucao"></div>
+      </div>
+
+      <div class="card">
+        <h2><span class="icon-chip"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="0.8" fill="currentColor" stroke="none"/></svg></span>Meta de margem</h2>
+        <div class="field"><label>Margem de contribuição alvo (%)</label><input type="number" step="0.01" data-percent="true" data-bind="fiscal.margemAlvo"></div>
+        <div class="checkline"><input type="checkbox" data-bind="fiscal.calcularComSugerido" data-bool="true"><label style="margin:0;">Usar PDV sugerido (em vez do PDV manual) em todos os canais</label></div>
+        <p class="hint">Quando ativado, o preço de cada canal é recalculado para entregar exatamente a margem alvo, considerando as taxas daquele canal.</p>
+      </div>
+    </div>
+
+    <div>
+      <div class="chan-scroll">
+        <table class="chan" id="chan-table"></table>
+      </div>
+      <footer class="note">Esta tabela replica, canal a canal, a lógica de precificação por Lucro Real: comissão, tarifa fixa, frete, créditos de PIS/COFINS sobre comissão e frete, ICMS, crédito presumido, DIFAL, PIS, COFINS, FCP, margem de devolução e despesas de envio (embalagens da aba Configurações).</footer>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== TAB: HISTÓRICO ===================== -->
+<section class="tab" id="tab-historico">
+  <div class="card" style="margin-bottom:16px;">
+    <h2><span class="icon-chip"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.2" y2="16.2"/></svg></span>Buscar precificações salvas</h2>
+    <div class="grid cols-3">
+      <div class="field"><label>Buscar por nome ou SKU</label><input type="text" id="hist-busca" placeholder="digite para filtrar…"></div>
+      <div class="field"><label>Fornecedor</label><select id="hist-fornecedor"><option value="">Todos</option></select></div>
+      <div class="field"><label>Linha do produto</label><select id="hist-linha"><option value="">Todas</option></select></div>
+    </div>
+  </div>
+  <div class="callout info">
+    A coluna <strong>margem hoje</strong> recalcula cada produto salvo usando as taxas de marketplace e as configurações fiscais/margem-alvo <em>atuais</em> — mesmo preço de venda salvo, regras de hoje. Assim você enxerga o efeito de qualquer mudança feita nas abas Marketplaces, ICMS ou na margem alvo sobre precificações antigas.
+  </div>
+  <div class="matrix-scroll" style="max-height:600px;">
+    <table class="fees" id="hist-table"></table>
+  </div>
+  <div class="empty-state" id="hist-empty">
+    <span class="icon">🗂️</span>
+    <strong>Nenhuma precificação salva ainda</strong>
+    <span>Vá até a aba Precificação, monte o cálculo do produto e clique em "Salvar no histórico".</span>
+  </div>
+</section>
+
+<!-- ===================== TAB: GMV ===================== -->
+<section class="tab" id="tab-gmv">
+  <div class="card" style="margin-bottom:16px;">
+    <h2><span class="icon-chip"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="16" rx="2"/><line x1="16" y1="3" x2="16" y2="7"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="3.5" y1="10" x2="20.5" y2="10"/></svg></span>Projetar um mês a partir da Precificação</h2>
+    <p class="desc">Escolha um canal já calculado na aba Precificação e uma quantidade média mensal de vendas para preencher automaticamente o mês selecionado abaixo (você pode ajustar os valores depois).</p>
+    <div class="row-inline" style="align-items:flex-end;">
+      <div class="field"><label>Mês</label><select id="gmv-apply-month"></select></div>
+      <div class="field"><label>Canal (da Precificação)</label><select id="gmv-apply-channel"></select></div>
+      <div class="field"><label>Unidades vendidas no mês</label><input type="number" id="gmv-apply-qty" step="1" value="100"></div>
+      <div class="field" style="flex:0;"><button class="small-btn" id="btnApplyGmv">Preencher mês</button></div>
+    </div>
+    <p class="hint" id="gmv-apply-hint"></p>
+  </div>
+  <div class="gmv-scroll">
+    <table class="gmv" id="gmv-table"></table>
+  </div>
+  <footer class="note">Ponto de equilíbrio = custos fixos ÷ margem de contribuição do mês. Resultado líquido = faturamento − custos variáveis − custos fixos. Este cálculo assume que a relação entre custos variáveis e faturamento é constante — use como orientação, não como certeza absoluta.</footer>
+</section>
+
+</main>
+  </div>
+</div>
+
+<script id="icms-data" type="application/json">{"AC":{"AC":19,"AL":12,"AM":12,"AP":12,"BA":12,"CE":12,"DF":12,"ES":12,"GO":12,"MA":12,"MG":12,"MS":12,"MT":12,"PA":12,"PB":12,"PE":12,"PI":12,"PR":12,"RJ":12,"RN":12,"RO":12,"RR":12,"RS":12,"SC":12,"SE":12,"SP":12,"TO":12},"AL":{"AC":12,"AL":21.5,"AM":12,"AP":12,"BA":12,"CE":12,"DF":12,"ES":12,"GO":12,"MA":12,"MG":12,"MS":12,"MT":12,"PA":12,"PB":12,"PE":12,"PI":12,"PR":12,"RJ":12,"RN":12,"RO":12,"RR":12,"RS":12,"SC":12,"SE":12,"SP":12,"TO":12},"AM":{"AC":12,"AL":12,"AM":20,"AP":12,"BA":12,"CE":12,"DF":12,"ES":12,"GO":12,"MA":12,"MG":12,"MS":12,"MT":12,"PA":12,"PB":12,"PE":12,"PI":12,"PR":12,"RJ":12,"RN":12,"RO":12,"RR":12,"RS":12,"SC":12,"SE":12,"SP":12,"TO":12},"AP":{"AC":12,"AL":12,"AM":12,"AP":18,"BA":12,"CE":12,"DF":12,"ES":12,"GO":12,"MA":12,"MG":12,"MS":12,"MT":12,"PA":12,"PB":12,"PE":12,"PI":12,"PR":12,"RJ":12,"RN":12,"RO":12,"RR":12,"RS":12,"SC":12,"SE":12,"SP":12,"TO":12},"BA":{"AC":12,"AL":12,"AM":12,"AP":12,"BA":20.5,"CE":12,"DF":12,"ES":12,"GO":12,"MA":12,"MG":12,"MS":12,"MT":12,"PA":12,"PB":12,"PE":12,"PI":12,"PR":12,"RJ":12,"RN":12,"RO":12,"RR":12,"RS":12,"SC":12,"SE":12,"SP":12,"TO":12},"CE":{"AC":12,"AL":12,"AM":12,"AP":12,"BA":12,"CE":20,"DF":12,"ES":12,"GO":12,"MA":12,"MG":12,"MS":12,"MT":12,"PA":12,"PB":12,"PE":12,"PI":12,"PR":12,"RJ":12,"RN":12,"RO":12,"RR":12,"RS":12,"SC":12,"SE":12,"SP":12,"TO":12},"DF":{"AC":12,"AL":12,"AM":12,"AP":12,"BA":12,"CE":12,"DF":20,"ES":12,"GO":12,"MA":12,"MG":12,"MS":12,"MT":12,"PA":12,"PB":12,"PE":12,"PI":12,"PR":12,"RJ":12,"RN":12,"RO":12,"RR":12,"RS":12,"SC":12,"SE":12,"SP":12,"TO":12},"ES":{"AC":12,"AL":12,"AM":12,"AP":12,"BA":12,"CE":12,"DF":12,"ES":17,"GO":12,"MA":12,"MG":12,"MS":12,"MT":12,"PA":12,"PB":12,"PE":12,"PI":12,"PR":12,"RJ":12,"RN":12,"RO":12,"RR":12,"RS":12,"SC":12,"SE":12,"SP":12,"TO":12},"GO":{"AC":12,"AL":12,"AM":12,"AP":12,"BA":12,"CE":12,"DF":12,"ES":12,"GO":19,"MA":12,"MG":12,"MS":12,"MT":12,"PA":12,"PB":12,"PE":12,"PI":12,"PR":12,"RJ":12,"RN":12,"RO":12,"RR":12,"RS":12,"SC":12,"SE":12,"SP":12,"TO":12},"MA":{"AC":12,"AL":12,"AM":12,"AP":12,"BA":12,"CE":12,"DF":12,"ES":12,"GO":12,"MA":23,"MG":12,"MS":12,"MT":12,"PA":12,"PB":12,"PE":12,"PI":12,"PR":12,"RJ":12,"RN":12,"RO":12,"RR":12,"RS":12,"SC":12,"SE":12,"SP":12,"TO":12},"MG":{"AC":7,"AL":7,"AM":7,"AP":7,"BA":7,"CE":7,"DF":7,"ES":7,"GO":7,"MA":7,"MG":18,"MS":7,"MT":7,"PA":7,"PB":7,"PE":7,"PI":7,"PR":12,"RJ":12,"RN":7,"RO":7,"RR":7,"RS":12,"SC":12,"SE":7,"SP":12,"TO":7},"MS":{"AC":12,"AL":12,"AM":12,"AP":12,"BA":12,"CE":12,"DF":12,"ES":12,"GO":12,"MA":12,"MG":12,"MS":17,"MT":12,"PA":12,"PB":12,"PE":12,"PI":12,"PR":12,"RJ":12,"RN":12,"RO":12,"RR":12,"RS":12,"SC":12,"SE":12,"SP":12,"TO":12},"MT":{"AC":12,"AL":12,"AM":12,"AP":12,"BA":12,"CE":12,"DF":12,"ES":12,"GO":12,"MA":12,"MG":12,"MS":12,"MT":17,"PA":12,"PB":12,"PE":12,"PI":12,"PR":12,"RJ":12,"RN":12,"RO":12,"RR":12,"RS":12,"SC":12,"SE":12,"SP":12,"TO":12},"PA":{"AC":12,"AL":12,"AM":12,"AP":12,"BA":12,"CE":12,"DF":12,"ES":12,"GO":12,"MA":12,"MG":12,"MS":12,"MT":12,"PA":19,"PB":12,"PE":12,"PI":12,"PR":12,"RJ":12,"RN":12,"RO":12,"RR":12,"RS":12,"SC":12,"SE":12,"SP":12,"TO":12},"PB":{"AC":12,"AL":12,"AM":12,"AP":12,"BA":12,"CE":12,"DF":12,"ES":12,"GO":12,"MA":12,"MG":12,"MS":12,"MT":12,"PA":12,"PB":20,"PE":12,"PI":12,"PR":12,"RJ":12,"RN":12,"RO":12,"RR":12,"RS":12,"SC":12,"SE":12,"SP":12,"TO":12},"PE":{"AC":12,"AL":12,"AM":12,"AP":12,"BA":12,"CE":12,"DF":12,"ES":12,"GO":12,"MA":12,"MG":12,"MS":12,"MT":12,"PA":12,"PB":12,"PE":20.5,"PI":12,"PR":12,"RJ":12,"RN":12,"RO":12,"RR":12,"RS":12,"SC":12,"SE":12,"SP":12,"TO":12},"PI":{"AC":12,"AL":12,"AM":12,"AP":12,"BA":12,"CE":12,"DF":12,"ES":12,"GO":12,"MA":12,"MG":12,"MS":12,"MT":12,"PA":12,"PB":12,"PE":12,"PI":22.5,"PR":12,"RJ":12,"RN":12,"RO":12,"RR":12,"RS":12,"SC":12,"SE":12,"SP":12,"TO":12},"PR":{"AC":7,"AL":7,"AM":7,"AP":7,"BA":7,"CE":7,"DF":7,"ES":7,"GO":7,"MA":7,"MG":12,"MS":7,"MT":7,"PA":7,"PB":7,"PE":7,"PI":7,"PR":19.5,"RJ":12,"RN":7,"RO":7,"RR":7,"RS":12,"SC":12,"SE":7,"SP":12,"TO":7},"RJ":{"AC":7,"AL":7,"AM":7,"AP":7,"BA":7,"CE":7,"DF":7,"ES":7,"GO":7,"MA":7,"MG":12,"MS":12,"MT":7,"PA":7,"PB":7,"PE":7,"PI":7,"PR":12,"RJ":22,"RN":7,"RO":7,"RR":7,"RS":12,"SC":12,"SE":7,"SP":12,"TO":7},"RN":{"AC":12,"AL":12,"AM":12,"AP":12,"BA":12,"CE":12,"DF":12,"ES":12,"GO":12,"MA":12,"MG":12,"MS":12,"MT":12,"PA":12,"PB":12,"PE":12,"PI":12,"PR":12,"RJ":12,"RN":20,"RO":12,"RR":12,"RS":12,"SC":12,"SE":12,"SP":12,"TO":12},"RO":{"AC":12,"AL":12,"AM":12,"AP":12,"BA":12,"CE":12,"DF":12,"ES":12,"GO":12,"MA":12,"MG":12,"MS":12,"MT":12,"PA":12,"PB":12,"PE":12,"PI":12,"PR":12,"RJ":12,"RN":12,"RO":19.5,"RR":12,"RS":12,"SC":12,"SE":12,"SP":12,"TO":12},"RR":{"AC":12,"AL":12,"AM":12,"AP":12,"BA":12,"CE":12,"DF":12,"ES":12,"GO":12,"MA":12,"MG":12,"MS":12,"MT":12,"PA":12,"PB":12,"PE":12,"PI":12,"PR":12,"RJ":12,"RN":12,"RO":12,"RR":20,"RS":12,"SC":12,"SE":12,"SP":12,"TO":12},"RS":{"AC":7,"AL":7,"AM":7,"AP":7,"BA":7,"CE":7,"DF":7,"ES":7,"GO":7,"MA":7,"MG":12,"MS":7,"MT":7,"PA":7,"PB":7,"PE":7,"PI":7,"PR":12,"RJ":12,"RN":7,"RO":7,"RR":7,"RS":17,"SC":12,"SE":7,"SP":12,"TO":7},"SC":{"AC":7,"AL":7,"AM":7,"AP":7,"BA":7,"CE":7,"DF":7,"ES":7,"GO":7,"MA":7,"MG":12,"MS":7,"MT":7,"PA":7,"PB":7,"PE":7,"PI":7,"PR":12,"RJ":12,"RN":7,"RO":7,"RR":7,"RS":12,"SC":17,"SE":7,"SP":12,"TO":7},"SE":{"AC":12,"AL":12,"AM":12,"AP":12,"BA":12,"CE":12,"DF":12,"ES":12,"GO":12,"MA":12,"MG":12,"MS":12,"MT":12,"PA":12,"PB":12,"PE":12,"PI":12,"PR":12,"RJ":12,"RN":12,"RO":12,"RR":12,"RS":12,"SC":12,"SE":20,"SP":12,"TO":12},"SP":{"AC":7,"AL":7,"AM":7,"AP":7,"BA":7,"CE":7,"DF":7,"ES":7,"GO":7,"MA":7,"MG":12,"MS":7,"MT":7,"PA":7,"PB":7,"PE":7,"PI":7,"PR":12,"RJ":12,"RN":7,"RO":7,"RR":7,"RS":12,"SC":12,"SE":7,"SP":18,"TO":7},"TO":{"AC":12,"AL":12,"AM":12,"AP":12,"BA":12,"CE":12,"DF":12,"ES":12,"GO":12,"MA":12,"MG":12,"MS":12,"MT":12,"PA":12,"PB":12,"PE":12,"PI":12,"PR":12,"RJ":12,"RN":12,"RO":12,"RR":12,"RS":12,"SC":12,"SE":12,"SP":12,"TO":20}}</script>
+<script>const ICON_PATHS = {
+  overview: "<path d=\"M3 20h18\"/><rect x=\"5\" y=\"12\" width=\"3\" height=\"8\" rx=\"1\"/><rect x=\"10.5\" y=\"7\" width=\"3\" height=\"13\" rx=\"1\"/><rect x=\"16\" y=\"3\" width=\"3\" height=\"17\" rx=\"1\"/>",
+  settings: "<line x1=\"4\" y1=\"6\" x2=\"20\" y2=\"6\"/><circle cx=\"9\" cy=\"6\" r=\"2\"/><line x1=\"4\" y1=\"12\" x2=\"20\" y2=\"12\"/><circle cx=\"15\" cy=\"12\" r=\"2\"/><line x1=\"4\" y1=\"18\" x2=\"20\" y2=\"18\"/><circle cx=\"7\" cy=\"18\" r=\"2\"/>",
+  percent: "<circle cx=\"12\" cy=\"12\" r=\"9\"/><line x1=\"8\" y1=\"16\" x2=\"16\" y2=\"8\"/><circle cx=\"8.5\" cy=\"8.5\" r=\"1\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"15.5\" cy=\"15.5\" r=\"1\" fill=\"currentColor\" stroke=\"none\"/>",
+  cart: "<path d=\"M6 8h13l-1.5 9.5a2 2 0 0 1-2 1.7H8.7a2 2 0 0 1-2-1.7L5 4H2\"/><circle cx=\"9\" cy=\"21\" r=\"1\"/><circle cx=\"17\" cy=\"21\" r=\"1\"/>",
+  tag: "<path d=\"M20.6 12.6 12.7 20.5a2 2 0 0 1-2.8 0l-7.4-7.4a2 2 0 0 1 0-2.8L10.2 2.4H20.6v10.2Z\"/><circle cx=\"15.5\" cy=\"7.5\" r=\"1.3\" fill=\"currentColor\" stroke=\"none\"/>",
+  coin: "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M9 9.3c0-1 1.2-1.8 3-1.8s3 .8 3 1.8-1.2 1.5-3 1.9-3 .9-3 1.9 1.2 1.8 3 1.8 3-.8 3-1.8\"/>",
+  clock: "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 7.5V12l3 2.5\"/>",
+  archive: "<rect x=\"3\" y=\"4\" width=\"18\" height=\"4\" rx=\"1\"/><path d=\"M5 8v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8\"/><line x1=\"10\" y1=\"12\" x2=\"14\" y2=\"12\"/>",
+  trending: "<path d=\"M3 17l6-6 4 4 8-8\"/><path d=\"M15 6h6v6\"/>",
+  shield: "<path d=\"M12 2.5 4.5 5.5V11c0 5.2 3.4 9 7.5 10.5 4.1-1.5 7.5-5.3 7.5-10.5V5.5L12 2.5Z\"/><path d=\"M8.7 12l2.3 2.3 4.3-4.3\"/>",
+  lock: "<rect x=\"5\" y=\"11\" width=\"14\" height=\"9\" rx=\"2\"/><path d=\"M8 11V7.5a4 4 0 0 1 8 0V11\"/>",
+  cloud: "<path d=\"M17 18.5H8a4.5 4.5 0 1 1 1.1-8.87A5.5 5.5 0 0 1 19.8 12 3.5 3.5 0 0 1 17 18.5Z\"/>",
+  factory: "<path d=\"M3 21V10.5l5.5 3.5v-3.5L14 14v-3.5l6 3.8V21H3Z\"/><line x1=\"6\" y1=\"21\" x2=\"6\" y2=\"17\"/><line x1=\"12\" y1=\"21\" x2=\"12\" y2=\"17\"/><line x1=\"18\" y1=\"21\" x2=\"18\" y2=\"17\"/>",
+  box: "<path d=\"M21 8 12 3 3 8l9 5 9-5Z\"/><path d=\"M3 8v9l9 5 9-5V8\"/><path d=\"M12 13v9\"/>",
+  search: "<circle cx=\"11\" cy=\"11\" r=\"7\"/><line x1=\"21\" y1=\"21\" x2=\"16.2\" y2=\"16.2\"/>",
+  calendar: "<rect x=\"3.5\" y=\"5\" width=\"17\" height=\"16\" rx=\"2\"/><line x1=\"16\" y1=\"3\" x2=\"16\" y2=\"7\"/><line x1=\"8\" y1=\"3\" x2=\"8\" y2=\"7\"/><line x1=\"3.5\" y1=\"10\" x2=\"20.5\" y2=\"10\"/>",
+  trophy: "<path d=\"M8 21h8\"/><path d=\"M12 17v4\"/><path d=\"M7 4h10v4.5a5 5 0 0 1-10 0V4Z\"/><path d=\"M17 5.5h2.5a3 3 0 0 1-3 4.5\"/><path d=\"M7 5.5H4.5a3 3 0 0 0 3 4.5\"/>",
+  alert: "<path d=\"M12 3 2.5 20h19L12 3Z\"/><line x1=\"12\" y1=\"10\" x2=\"12\" y2=\"14.5\"/><circle cx=\"12\" cy=\"17.3\" r=\"0.9\" fill=\"currentColor\" stroke=\"none\"/>",
+  plus: "<line x1=\"12\" y1=\"5\" x2=\"12\" y2=\"19\"/><line x1=\"5\" y1=\"12\" x2=\"19\" y2=\"12\"/>",
+  link: "<path d=\"M9.5 14.5 14.5 9.5\"/><path d=\"M11 6.5l1-1a4 4 0 1 1 5.5 5.5l-1 1\"/><path d=\"M13 17.5l-1 1a4 4 0 1 1-5.5-5.5l1-1\"/>",
+  pin: "<path d=\"M12 21s7-6.8 7-12a7 7 0 1 0-14 0c0 5.2 7 12 7 12Z\"/><circle cx=\"12\" cy=\"9\" r=\"2.4\"/>",
+  target: "<circle cx=\"12\" cy=\"12\" r=\"8.5\"/><circle cx=\"12\" cy=\"12\" r=\"4.5\"/><circle cx=\"12\" cy=\"12\" r=\"0.8\" fill=\"currentColor\" stroke=\"none\"/>",
+  bolt: "<path d=\"M13 2 4.5 14h6l-1 8 9-12h-6l1-8Z\"/>",
+  id: "<path d=\"M6 3h12a1 1 0 0 1 1 1v16l-7-4-7 4V4a1 1 0 0 1 1-1Z\"/>",
+  sun: "<circle cx=\"12\" cy=\"12\" r=\"4\"/><path d=\"M12 2.5v2.2M12 19.3v2.2M4.6 4.6l1.55 1.55M17.85 17.85l1.55 1.55M2.5 12h2.2M19.3 12h2.2M4.6 19.4l1.55-1.55M17.85 6.15l1.55-1.55\"/>",
+  moon: "<path d=\"M20.5 13.2A8.5 8.5 0 1 1 10.8 3.5a6.5 6.5 0 0 0 9.7 9.7Z\"/>",
+  refresh: "<path d=\"M3.5 12a8.5 8.5 0 1 0 2.8-6.3\"/><path d=\"M3.5 4v5h5\"/>",
+  menu: "<line x1=\"4\" y1=\"7\" x2=\"20\" y2=\"7\"/><line x1=\"4\" y1=\"12\" x2=\"20\" y2=\"12\"/><line x1=\"4\" y1=\"17\" x2=\"20\" y2=\"17\"/>",
+  x: "<line x1=\"6\" y1=\"6\" x2=\"18\" y2=\"18\"/><line x1=\"6\" y1=\"18\" x2=\"18\" y2=\"6\"/>",
+  grid: "<rect x=\"3\" y=\"3\" width=\"7\" height=\"7\" rx=\"1\"/><rect x=\"14\" y=\"3\" width=\"7\" height=\"7\" rx=\"1\"/><rect x=\"3\" y=\"14\" width=\"7\" height=\"7\" rx=\"1\"/><rect x=\"14\" y=\"14\" width=\"7\" height=\"7\" rx=\"1\"/>",
+  globe: "<circle cx=\"12\" cy=\"12\" r=\"9\"/><ellipse cx=\"12\" cy=\"12\" rx=\"4\" ry=\"9\"/><line x1=\"3\" y1=\"12\" x2=\"21\" y2=\"12\"/>",
+};
+function svgIcon(name, size){
+  size = size || 18;
+  const inner = ICON_PATHS[name] || '';
+  return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${inner}</svg>`;
+}
+/* ===================== DADOS BASE ===================== */
+const ICMS = JSON.parse(document.getElementById('icms-data').textContent);
+const UF_LIST = Object.keys(ICMS).sort();
+const RATES = { pisPct:0.0165, cofinsPct:0.076, pisCofins:0.0925 }; // S18, S19, S10
+
+function internalRate(uf){ return (ICMS[uf] && ICMS[uf][uf] || 0)/100; }
+function interstateRate(origin,dest){ return (ICMS[origin] && ICMS[origin][dest] || 0)/100; }
+
+const MKT_DEFAULT = [
+  {marketplace:'Mercado Livre', tier:'Clássico', linha:'Wave', pct:0.14, fixa:0, frete:24, pix:'-', obs:'Taxa da plataforma de 14%; frete médio informado de R$ 24.'},
+  {marketplace:'Mercado Livre', tier:'Premium', linha:'Wave', pct:0.17, fixa:0, frete:22, pix:'-', obs:'Taxa da plataforma de 17%; frete médio informado de R$ 22.'},
+  {marketplace:'Mercado Livre', tier:'Premium', linha:'Vélon', pct:0.17, fixa:0, frete:50, pix:'-', obs:'Taxa da plataforma de 17%; frete médio informado de R$ 50.'},
+  {marketplace:'Mercado Livre', tier:'Premium', linha:'Bravur', pct:0.17, fixa:0, frete:47.5, pix:'-', obs:'Frete entre R$45 e R$50; média R$47,50.'},
+  {marketplace:'Shopee', tier:'Até R$79,99', linha:'Wave', pct:0.20, fixa:4, frete:0, pix:'-', obs:'Faixa 1: 20% + R$4.'},
+  {marketplace:'Shopee', tier:'R$80–99,99', linha:'Wave', pct:0.14, fixa:16, frete:0, pix:'5%', obs:'Faixa 2: 14% + R$16; subsídio Pix 5%.'},
+  {marketplace:'Shopee', tier:'R$100–199,99', linha:'Wave', pct:0.14, fixa:20, frete:0, pix:'5%', obs:'Faixa 3: 14% + R$20; subsídio Pix 5%.'},
+  {marketplace:'Shopee', tier:'R$200–499,99', linha:'Bravur/Vélon', pct:0.14, fixa:26, frete:0, pix:'5%', obs:'Faixa 4: 14% + R$26; subsídio Pix 5%.'},
+  {marketplace:'Shopee', tier:'Acima de R$500', linha:'Bravur/Vélon', pct:0.14, fixa:26, frete:0, pix:'até 8%', obs:'Faixa 5: 14% + R$26; subsídio Pix até 8%.'},
+  {marketplace:'TikTok', tier:'Padrão', linha:'Todas', pct:null, fixa:6, frete:0, pix:'-', obs:'Taxa fixa de R$6 por item; percentual não informado.'},
+  {marketplace:'Magalu', tier:'Padrão', linha:'Todas', pct:0.099, fixa:5.5, frete:0, pix:'-', obs:'9,9% + tarifa de R$5,50 por item; frete não informado.'},
+  {marketplace:'Amazon', tier:'Padrão', linha:'Todas', pct:0.12, fixa:0, frete:0, pix:'-', obs:'Comissão de 12%; frete não informado.'},
+];
+const SHOPEE_TIERS = [
+  {max:79.99, idx:4}, {max:99.99, idx:5}, {max:199.99, idx:6}, {max:499.99, idx:7}, {max:Infinity, idx:8}
+];
+function shopeeTierForPdv(pdv){
+  const t = SHOPEE_TIERS.find(t=>pdv<=t.max) || SHOPEE_TIERS[SHOPEE_TIERS.length-1];
+  return MKT_DEFAULT[t.idx];
+}
+
+function defaultChannels(mkt){
+  const find=(mp,tier)=>mkt.find(r=>r.marketplace===mp && r.tier===tier) || {};
+  const meliClassico = find('Mercado Livre','Clássico');
+  const meliPremium = find('Mercado Livre','Premium');
+  const magalu = find('Magalu','Padrão');
+  const amazon = find('Amazon','Padrão');
+  const tiktok = find('TikTok','Padrão');
+  const shopeeFaixa1 = find('Shopee','Até R$79,99');
+  return {
+    site:      {label:'Site Próprio',            comissaoPct:null, taxaFixa:null, frete:null, adsPct:0.05, pdvManual:369.46, pdvDefault:369.46, rebateFixo:null, rebatePct:null, comissaoSobreRebate:false},
+    meli_classico: {label:'Mercado Livre Clássico', comissaoPct:meliClassico.pct, taxaFixa:meliClassico.fixa||null, frete:meliClassico.frete, adsPct:0.05, pdvManual:549, pdvDefault:549, rebateFixo:null, rebatePct:null, comissaoSobreRebate:false},
+    meli_premium:  {label:'Mercado Livre Premium', comissaoPct:meliPremium.pct, taxaFixa:meliPremium.fixa||null, frete:22, freteOpcao:'Wave', adsPct:0.05, pdvManual:549, pdvDefault:549, rebateFixo:null, rebatePct:null, comissaoSobreRebate:false},
+    shopee:    {label:'Shopee', comissaoPct:shopeeFaixa1.pct, taxaFixa:shopeeFaixa1.fixa, frete:0, adsPct:0.05, pdvManual:549, pdvDefault:549, autoTier:true, rebateFixo:null, rebatePct:null, comissaoSobreRebate:false},
+    magalu:    {label:'Magalu', comissaoPct:magalu.pct, taxaFixa:magalu.fixa||null, frete:0, adsPct:0.05, pdvManual:549, pdvDefault:549, rebateFixo:null, rebatePct:null, comissaoSobreRebate:false},
+    amazon:    {label:'Amazon', comissaoPct:amazon.pct, taxaFixa:amazon.fixa||null, frete:0, adsPct:0.05, pdvManual:549, pdvDefault:549, rebateFixo:null, rebatePct:null, comissaoSobreRebate:false},
+    tiktok:    {label:'TikTok Shop', comissaoPct:tiktok.pct, taxaFixa:tiktok.fixa||null, frete:0, adsPct:0.05, pdvManual:549, pdvDefault:549, rebateFixo:null, rebatePct:null, comissaoSobreRebate:false},
+  };
+}
+
+function defaultState(){
+  const mkt = JSON.parse(JSON.stringify(MKT_DEFAULT));
+  return {
+    config: { ufArmazem:'SP', embalagem:1, bolha:1, etiqueta:0.2, brinde:2.1, publicidade:0 },
+    fiscal: {
+      regimeFornecedor:'Regime Normal', ufDestino:'MG', considerarDifal:true, aliqFcp:null, aliqIcmsManual:null,
+      incentivoRetirarBase:true, beneficioCredPresumido:false, teseCreditarComissao:true, teseCreditarFrete:true,
+      monofasico:false, margemAlvo:0.20, calcularComSugerido:false
+    },
+    produto: { nome:'', sku:'', fornecedor:'', linha:'', valorCompra:169.83, rateioFrete:0, aliqIcms:0, aliqIcmsST:0.16, aliqIpi:0.0975, cmvManual:null },
+    devolucao: { taxaDevolucao:0 },
+    canais: defaultChannels(mkt),
+    marketplaceFees: mkt,
+    products: [],
+    editingProductId: null,
+    local: { userName:'', cloudUrl:'', appPassword:'', theme:'system' },
+    gmv: { months: Array.from({length:12},()=>({fat:null,imp:null,cmv:null,com:null,fre:null,emb:null,ins:null,pla:null,fol:null,con:null})) }
+  };
+}
+
+const MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+let state;
+try{
+  const saved = localStorage.getItem('lanzi-precificacao-v1');
+  state = saved ? JSON.parse(saved) : defaultState();
+  // merge in case of missing keys from an older version
+  const def = defaultState();
+  state = Object.assign({}, def, state);
+  state.config = Object.assign({}, def.config, state.config);
+  state.fiscal = Object.assign({}, def.fiscal, state.fiscal);
+  state.produto = Object.assign({}, def.produto, state.produto);
+  state.devolucao = Object.assign({}, def.devolucao, state.devolucao);
+  if(!state.marketplaceFees) state.marketplaceFees = def.marketplaceFees;
+  if(!state.canais) state.canais = def.canais;
+  if(!state.gmv) state.gmv = def.gmv;
+  if(!Array.isArray(state.products)) state.products = [];
+  if(state.editingProductId===undefined) state.editingProductId = null;
+  state.local = Object.assign({}, def.local, state.local);
+}catch(e){ state = defaultState(); }
+
+function saveState(){
+  try{ localStorage.setItem('lanzi-precificacao-v1', JSON.stringify(state)); }catch(e){}
+}
+
+function getPath(obj,path){ return path.split('.').reduce((o,k)=>(o==null?o:o[k]), obj); }
+function setPath(obj,path,val){ const ks=path.split('.'); let o=obj; for(let i=0;i<ks.length-1;i++){o=o[ks[i]];} o[ks[ks.length-1]]=val; }
+function isNum(v){ return typeof v==='number' && !isNaN(v); }
+function fmtR$(v){ if(v==null||isNaN(v)) return '—'; return v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'}); }
+function fmtPct(v){ if(v==null||isNaN(v)) return '—'; return (v*100).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})+'%'; }
+function fmtNum(v,d=2){ if(v==null||isNaN(v)) return '—'; return v.toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d}); }
+function uid(){ return 'p_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,8); }
+function fmtDate(ts){ if(!ts) return '—'; return new Date(ts).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'}); }
+/* ===================== MOTOR DE CÁLCULO ===================== */
+/* Todas as funções recebem um "ctx" explícito ({config, fiscal, produto, devolucao, canais})
+   em vez de ler a variável global `state` diretamente. Isso permite recalcular tanto o
+   produto sendo editado ao vivo (ctx = state) quanto um produto salvo no histórico,
+   comparando a margem salva com a margem sob as taxas/configurações atuais. */
+
+function calcCMV(ctx){
+  const p = ctx.produto, f = ctx.fiscal;
+  const valorICMSST = p.valorCompra * p.aliqIcmsST;      // C13
+  const valorIPI = p.valorCompra * p.aliqIpi;             // C14
+  const impostosEDespesas = valorICMSST + valorIPI + p.rateioFrete; // C15
+  const icmsCredito = (p.aliqIcmsST>0 || f.regimeFornecedor==='Simples Nacional') ? 0 : p.valorCompra*p.aliqIcms; // C17
+  const pisCredito = (f.regimeFornecedor==='Simples Nacional') ? 0 : p.valorCompra*RATES.pisPct;    // C18
+  const cofinsCredito = (f.regimeFornecedor==='Simples Nacional') ? 0 : p.valorCompra*RATES.cofinsPct; // C19
+  const creditosCompra = icmsCredito + pisCredito + cofinsCredito; // C20
+  const cmvCalculado = p.valorCompra + impostosEDespesas - creditosCompra; // C22 (sem override)
+  const cmv = isNum(p.cmvManual) ? p.cmvManual : cmvCalculado;
+  return { valorICMSST, valorIPI, impostosEDespesas, icmsCredito, pisCredito, cofinsCredito, creditosCompra, cmvCalculado, cmv };
+}
+
+function calcSharedRates(ctx){
+  const f = ctx.fiscal;
+  const s15 = isNum(f.aliqIcmsManual) ? f.aliqIcmsManual : interstateRate(ctx.config.ufArmazem, f.ufDestino);
+  const s17 = f.considerarDifal ? Math.max(0, internalRate(f.ufDestino) - s15) : 0;
+  const s20 = isNum(f.aliqFcp) ? f.aliqFcp : 0;
+  const s12 = RATES.pisCofins + s15;
+  return { s15, s17, s20, s10:RATES.pisCofins, s12 };
+}
+
+function despesasEnvio(config){
+  const c = config;
+  return (c.embalagem||0)+(c.bolha||0)+(c.etiqueta||0)+(c.brinde||0)+(c.publicidade||0);
+}
+
+// Núcleo de cálculo de um canal, dado comissaoPct/taxaFixa/frete/adsPct/pdv já resolvidos.
+function channelCore(pdv, comissaoPct, taxaFixa, frete, adsPct, cmvResult, S, env, ctx){
+  const f = ctx.fiscal, dev = ctx.devolucao;
+  const comissao = isNum(comissaoPct) ? pdv*comissaoPct : 0;                       // K8
+  const taxaFixaV = isNum(taxaFixa) ? taxaFixa : 0;                                 // K9
+  const descontoComissao = f.teseCreditarComissao ? (comissao+taxaFixaV)*S.s10 : 0; // K10
+  const freteV = isNum(frete) ? frete : 0;                                          // K11
+  const descontoFrete = f.teseCreditarFrete ? freteV*S.s12 : 0;                     // K12
+  const adsPctV = isNum(adsPct) ? adsPct : 0;
+  const ads = pdv*adsPctV;                                                          // K14
+  const icms = pdv*S.s15;                                                           // K15
+  const icmsCredPresumido = f.beneficioCredPresumido ? icms*0.75 : 0;               // K16
+  const difal = pdv*S.s17;                                                          // K17
+  const pis = f.monofasico ? 0 : (f.incentivoRetirarBase ? pdv*(1-S.s15-S.s10)*RATES.pisPct : pdv*RATES.pisPct); // K18
+  const cofins = f.monofasico ? 0 : (f.incentivoRetirarBase ? pdv*(1-S.s15-S.s10)*RATES.cofinsPct : pdv*RATES.cofinsPct); // K19
+  const fcp = pdv*S.s20;                                                            // K20
+  const margemDevolucao = isNum(dev.taxaDevolucao) ? pdv*dev.taxaDevolucao : 0;     // K21
+  const receitaLiquida = pdv - comissao - taxaFixaV + descontoComissao - freteV + descontoFrete
+    - ads - icms + icmsCredPresumido - difal - pis - cofins - fcp - margemDevolucao - env; // K23
+  const cmv = cmvResult.cmv;                                                         // K25
+  const resultadoBruto = receitaLiquida - cmv;                                       // K26
+  const margem = pdv!==0 ? resultadoBruto/pdv : 0;                                   // K27
+  return { pdv, comissaoPct, comissao, taxaFixa:taxaFixaV, descontoComissao, frete:freteV, descontoFrete,
+    adsPct:adsPctV, ads, icms, icmsCredPresumido, difal, pis, cofins, fcp, margemDevolucao,
+    despesasEnvio:env, receitaLiquida, cmv, resultadoBruto, margem };
+}
+
+// PDV sugerido (fórmula inversa, replica K29)
+function pdvSugerido(comissaoPct, taxaFixa, frete, adsPct, cmvResult, S, env, ctx){
+  const f = ctx.fiscal, dev = ctx.devolucao;
+  const taxaComissaoTese = f.teseCreditarComissao ? S.s10 : 0;
+  const taxaFreteTese = f.teseCreditarFrete ? S.s12 : 0;
+  const taxaFixaAdj = isNum(taxaFixa) ? taxaFixa*(1-taxaComissaoTese) : 0;
+  const freteAdj = isNum(frete) ? frete*(1-taxaFreteTese) : 0;
+  const numerator = cmvResult.cmv + env + taxaFixaAdj + freteAdj;
+  const comissaoAdj = isNum(comissaoPct) ? comissaoPct*(1-taxaComissaoTese) : 0;
+  const adsV = isNum(adsPct) ? adsPct : 0;
+  const pisCofinsRate = f.monofasico ? 0 : (f.incentivoRetirarBase ? (1-S.s15-S.s10)*S.s10 : S.s10);
+  const devRate = isNum(dev.taxaDevolucao) ? dev.taxaDevolucao : 0;
+  const denominator = 1 - f.margemAlvo - (comissaoAdj + adsV + S.s15 + S.s17 + pisCofinsRate + S.s20 + devRate);
+  if(denominator<=0) return NaN;
+  return Math.round((numerator/denominator)*100)/100;
+}
+
+// Calcula um canal completo, resolvendo PDV (manual ou sugerido) e, para Shopee, a faixa automática.
+function calcChannel(key, ch, cmvResult, S, env, ctx){
+  let comissaoPct = ch.comissaoPct, taxaFixa = ch.taxaFixa, frete = ch.frete, adsPct = ch.adsPct;
+  const f = ctx.fiscal;
+  let pdv;
+  const resolvePdv = (cp,tf) => f.calcularComSugerido
+    ? pdvSugerido(cp, tf, frete, adsPct, cmvResult, S, env, ctx)
+    : (isNum(ch.pdvManual) ? ch.pdvManual : ch.pdvDefault);
+
+  if(key==='shopee' && ch.autoTier!==false){
+    let seedTier = shopeeTierForPdv(isNum(ch.pdvManual)?ch.pdvManual:ch.pdvDefault);
+    comissaoPct = seedTier.pct; taxaFixa = seedTier.fixa;
+    pdv = resolvePdv(comissaoPct, taxaFixa);
+    if(isNum(pdv)){
+      const tier2 = shopeeTierForPdv(pdv);
+      comissaoPct = tier2.pct; taxaFixa = tier2.fixa;
+      pdv = resolvePdv(comissaoPct, taxaFixa);
+      const tier3 = shopeeTierForPdv(pdv);
+      comissaoPct = tier3.pct; taxaFixa = tier3.fixa;
+    }
+  } else {
+    pdv = resolvePdv(comissaoPct, taxaFixa);
+  }
+  if(!isNum(pdv)) pdv = 0;
+
+  const core = channelCore(pdv, comissaoPct, taxaFixa, frete, adsPct, cmvResult, S, env, ctx);
+  const rebateEfetivo = (isNum(ch.rebateFixo)?ch.rebateFixo:0) + (isNum(ch.rebatePct)?pdv*ch.rebatePct:0); // K33
+  const comissaoRebate = (ch.comissaoSobreRebate && isNum(comissaoPct)) ? rebateEfetivo*comissaoPct : 0;   // K34
+  const resultadoBrutoFinal = core.resultadoBruto + rebateEfetivo - comissaoRebate;                         // K36
+  const margemFinal = pdv!==0 ? resultadoBrutoFinal/pdv : 0;                                                // K37
+  return Object.assign({}, core, { rebateEfetivo, comissaoRebate, resultadoBrutoFinal, margemFinal, resolvedComissaoPct:comissaoPct, resolvedTaxaFixa:taxaFixa });
+}
+
+// ctx = {config, fiscal, produto, devolucao, canais}. Por padrão usa o estado ao vivo.
+function computeAll(ctx){
+  ctx = ctx || state;
+  const cmvResult = calcCMV(ctx);
+  const S = calcSharedRates(ctx);
+  const env = despesasEnvio(ctx.config);
+  const channels = {};
+  Object.keys(ctx.canais).forEach(key=>{
+    channels[key] = calcChannel(key, ctx.canais[key], cmvResult, S, env, ctx);
+  });
+  return { cmvResult, S, env, channels };
+}
+
+// Monta um ctx a partir de um registro salvo, opcionalmente trocando config/fiscal/taxas
+// de marketplace pelas atuais — usado para responder "como ficaria a margem hoje?".
+function ctxFromRecord(record, useCurrentSettings){
+  const canaisClone = JSON.parse(JSON.stringify(record.canais));
+  if(useCurrentSettings){
+    const fresh = defaultChannels(state.marketplaceFees);
+    Object.keys(canaisClone).forEach(k=>{
+      if(!fresh[k]) return;
+      canaisClone[k].comissaoPct = fresh[k].comissaoPct;
+      canaisClone[k].taxaFixa = fresh[k].taxaFixa;
+      canaisClone[k].frete = fresh[k].frete;
+    });
+  }
+  return {
+    config: useCurrentSettings ? state.config : record.config,
+    fiscal: useCurrentSettings ? state.fiscal : record.fiscal,
+    produto: record.produto,
+    devolucao: record.devolucao,
+    canais: canaisClone
+  };
+}
+/* ===================== RENDERIZAÇÃO ===================== */
+function fillUfSelect(sel, selected){
+  sel.innerHTML = UF_LIST.map(uf=>`<option value="${uf}" ${uf===selected?'selected':''}>${uf}</option>`).join('');
+}
+
+// Define o valor exibido num campo ligado a data-bind. Campos marcados data-writeonly="true"
+// (URL/senha da nuvem) nunca reexibem o valor salvo: se já existe um valor, mostram pontos e
+// ficam bloqueados para edição direta — só é possível SUBSTITUIR (botão "Alterar"), nunca reler.
+function setDisplayValueForBind(el, path){
+  const isBool = el.getAttribute('data-bool')==='true';
+  const isPercent = el.getAttribute('data-percent')==='true';
+  const isWriteonly = el.getAttribute('data-writeonly')==='true';
+  let v = getPath(state, path);
+  if(isWriteonly){
+    const hasValue = v!=null && v!=='';
+    el.readOnly = hasValue;
+    el.classList.toggle('locked-field', hasValue);
+    el.value = hasValue ? '••••••••••••••' : '';
+    return;
+  }
+  if(el.tagName==='SELECT'){ el.value = v!=null ? v : ''; }
+  else if(isBool){ el.checked = !!v; }
+  else if(v==null){ el.value=''; }
+  else { el.value = isPercent ? (v*100) : v; }
+}
+
+function bindGenericInputs(root){
+  root.querySelectorAll('[data-bind]').forEach(el=>{
+    const path = el.getAttribute('data-bind');
+    const isBool = el.getAttribute('data-bool')==='true';
+    const isPercent = el.getAttribute('data-percent')==='true';
+    // valor atual (sempre atualizado, mesmo em re-chamadas após reset)
+    setDisplayValueForBind(el, path);
+
+    if(el.dataset.boundGeneric) return;
+    el.dataset.boundGeneric = '1';
+    el.addEventListener(el.tagName==='SELECT'?'change':'input', ()=>{
+      let val;
+      if(isBool){ val = el.checked; }
+      else if(el.type==='number'){
+        val = el.value==='' ? null : parseFloat(el.value.replace(',','.'));
+        if(isPercent && val!=null) val = val/100;
+      } else { val = el.value; }
+      setPath(state, path, val);
+      saveState();
+      renderAll();
+      if(path.startsWith('config.') || path.startsWith('fiscal.')) scheduleCloudConfigWrite();
+    });
+  });
+}
+
+function renderConfig(){
+  const sel = document.getElementById('cfg-uf');
+  if(!sel.options.length) fillUfSelect(sel, state.config.ufArmazem);
+  const total = despesasEnvio(state.config);
+  document.getElementById('cfg-pack-total').textContent = `Total por pedido: ${fmtR$(total)} — usado como "Despesas de Envio" em cada canal.`;
+}
+
+function renderIcms(){
+  const oSel = document.getElementById('icms-origem'), dSel = document.getElementById('icms-destino');
+  if(!oSel.options.length){
+    fillUfSelect(oSel, state.config.ufArmazem);
+    fillUfSelect(dSel, state.fiscal.ufDestino);
+  }
+  if(!oSel.dataset.listenersBound){
+    oSel.dataset.listenersBound = '1';
+    oSel.addEventListener('change', renderIcms);
+    dSel.addEventListener('change', renderIcms);
+    document.getElementById('icms-sim-valor').addEventListener('input', renderIcms);
+  }
+  document.getElementById('icms-origem-atual').textContent = state.config.ufArmazem;
+  const origem = oSel.value || state.config.ufArmazem;
+  const destino = dSel.value || state.fiscal.ufDestino;
+  const inter = interstateRate(origem,destino);
+  const interna = internalRate(destino);
+  const difal = Math.max(0, interna-inter);
+  document.getElementById('icms-result').innerHTML = `
+    <div class="kpi"><div class="l">Alíquota interestadual</div><div class="v">${fmtPct(inter)}</div></div>
+    <div class="kpi"><div class="l">Alíquota interna do destino</div><div class="v">${fmtPct(interna)}</div></div>
+    <div class="kpi"><div class="l">DIFAL</div><div class="v">${fmtPct(difal)}</div></div>`;
+  const valor = parseFloat((document.getElementById('icms-sim-valor').value||'0').replace(',','.'))||0;
+  document.getElementById('icms-sim-result').innerHTML = `
+    <div class="kpi"><div class="l">ICMS da operação</div><div class="v">${fmtR$(valor*inter)}</div></div>
+    <div class="kpi"><div class="l">Valor do DIFAL</div><div class="v">${fmtR$(valor*difal)}</div></div>
+    <div class="kpi"><div class="l">Carga total de ICMS</div><div class="v">${fmtR$(valor*(inter+difal))}</div></div>`;
+
+  const table = document.getElementById('icms-matrix');
+  if(!table.innerHTML){
+    let html = '<thead><tr><th class="rowhead">Origem \\ Destino</th>'+UF_LIST.map(u=>`<th>${u}</th>`).join('')+'</tr></thead><tbody>';
+    UF_LIST.forEach(o=>{
+      html += `<tr><td class="rowhead">${o}</td>`;
+      UF_LIST.forEach(d=>{
+        const val = ICMS[o][d];
+        html += `<td class="${o===d?'diag':''}">${val}%</td>`;
+      });
+      html += '</tr>';
+    });
+    html += '</tbody>';
+    table.innerHTML = html;
+  }
+}
+
+function renderMarketplaces(){
+  const table = document.getElementById('mkt-table');
+  if(!table.dataset.built){
+    let html = `<thead><tr><th>Marketplace</th><th>Faixa / tipo</th><th>Linha</th><th>Comissão %</th><th>Tarifa fixa (R$)</th><th>Frete médio (R$)</th><th>Subsídio Pix</th></tr></thead><tbody>`;
+    state.marketplaceFees.forEach((row,i)=>{
+      html += `<tr>
+        <td>${row.marketplace}</td>
+        <td>${row.tier}</td>
+        <td><span class="tag">${row.linha}</span></td>
+        <td><input type="number" step="0.01" data-mkt="${i}" data-mkt-field="pct" value="${row.pct!=null?(row.pct*100):''}" placeholder="—"></td>
+        <td><input type="number" step="0.01" data-mkt="${i}" data-mkt-field="fixa" value="${row.fixa||0}"></td>
+        <td><input type="number" step="0.01" data-mkt="${i}" data-mkt-field="frete" value="${row.frete||0}"></td>
+        <td style="text-align:center;color:var(--muted);">${row.pix}</td>
+      </tr>`;
+    });
+    html += '</tbody>';
+    table.innerHTML = html;
+    table.dataset.built = '1';
+    table.querySelectorAll('input[data-mkt]').forEach(inp=>{
+      inp.addEventListener('input', ()=>{
+        const i = parseInt(inp.getAttribute('data-mkt'));
+        const field = inp.getAttribute('data-mkt-field');
+        let val = inp.value==='' ? null : parseFloat(inp.value.replace(',','.'));
+        if(field==='pct' && val!=null) val = val/100;
+        state.marketplaceFees[i][field] = val;
+        saveState();
+        applyFeesToChannels();
+        renderAll();
+        scheduleCloudConfigWrite();
+      });
+    });
+  }
+}
+
+function applyFeesToChannels(){
+  const mkt = state.marketplaceFees;
+  const find=(mp,tier)=>mkt.find(r=>r.marketplace===mp && r.tier===tier) || {};
+  const c = state.canais;
+  const mc = find('Mercado Livre','Clássico'); c.meli_classico.comissaoPct = mc.pct; c.meli_classico.taxaFixa = mc.fixa||null; c.meli_classico.frete = mc.frete;
+  const mp = find('Mercado Livre','Premium');
+  c.meli_premium.comissaoPct = mp.pct; c.meli_premium.taxaFixa = mp.fixa||null;
+  const magalu = find('Magalu','Padrão'); c.magalu.comissaoPct = magalu.pct; c.magalu.taxaFixa = magalu.fixa||null; c.magalu.frete = magalu.frete;
+  const amazon = find('Amazon','Padrão'); c.amazon.comissaoPct = amazon.pct; c.amazon.taxaFixa = amazon.fixa||null; c.amazon.frete = amazon.frete;
+  const tiktok = find('TikTok','Padrão'); c.tiktok.comissaoPct = tiktok.pct; c.tiktok.taxaFixa = tiktok.fixa||null; c.tiktok.frete = tiktok.frete;
+  const shopee1 = find('Shopee','Até R$79,99'); c.shopee.comissaoPct = shopee1.pct; c.shopee.taxaFixa = shopee1.fixa;
+  saveState();
+}
+/* ===================== PRECIFICAÇÃO: TABELA POR CANAL ===================== */
+const CHANNEL_ORDER = ['site','meli_classico','meli_premium','shopee','magalu','amazon','tiktok'];
+
+function chanInputCell(key, field, value, opts){
+  opts = opts||{};
+  const pct = opts.percent ? (value!=null?(value*100):'') : (value!=null?value:'');
+  const disabled = opts.disabled ? 'disabled' : '';
+  return `<input type="number" step="0.01" data-chan="${key}" data-chan-field="${field}" value="${pct}" ${disabled} placeholder="${opts.placeholder||'—'}">`;
+}
+
+function renderChannelTable(){
+  const results = computeAll();
+  window.__lastResults = results;
+  const table = document.getElementById('chan-table');
+  const chans = CHANNEL_ORDER.map(k=>({key:k, cfg:state.canais[k], r:results.channels[k]}));
+
+  let head = '<thead><tr><th>Canal</th>' + chans.map(c=>`<th>${c.cfg.label}</th>`).join('') + '</tr></thead><tbody>';
+
+  function row(label, cellsFn, opts){
+    opts = opts || {};
+    return `<tr class="${opts.cls||''}"><td>${label}</td>` + chans.map(c=>`<td>${cellsFn(c)}</td>`).join('') + '</tr>';
+  }
+  function sectionHead(label){
+    return `<tr class="section-head"><td>${label}</td>${chans.map(()=>'<td></td>').join('')}</tr>`;
+  }
+
+  let body = '';
+  body += sectionHead('Entradas do canal');
+  body += row('PDV — preço de venda (R$)', c=>{
+    if(state.fiscal.calcularComSugerido) return `<strong>${fmtR$(c.r.pdv)}</strong>`;
+    return chanInputCell(c.key,'pdvManual', c.cfg.pdvManual, {placeholder:fmtNum(c.cfg.pdvDefault,2)});
+  });
+  body += row('Comissão do canal (%)', c=>{
+    if(c.key==='shopee' && c.cfg.autoTier!==false) return `<span class="tag">auto: ${fmtPct(c.r.resolvedComissaoPct)}</span>`;
+    return chanInputCell(c.key,'comissaoPct', c.cfg.comissaoPct, {percent:true});
+  });
+  body += row('Tarifa fixa do canal (R$)', c=>{
+    if(c.key==='shopee' && c.cfg.autoTier!==false) return `<span class="tag">auto: ${fmtR$(c.r.resolvedTaxaFixa)}</span>`;
+    return chanInputCell(c.key,'taxaFixa', c.cfg.taxaFixa);
+  });
+  body += row('Frete médio do canal (R$)', c=> chanInputCell(c.key,'frete', c.cfg.frete));
+  body += row('Investimento em Ads (%)', c=> chanInputCell(c.key,'adsPct', c.cfg.adsPct, {percent:true}));
+  if(state.canais.shopee.autoTier!==false){
+    body += row('Faixa Shopee selecionada automaticamente', c=>{
+      if(c.key!=='shopee') return '';
+      return `<label style="font-size:10.5px;color:var(--muted);"><input type="checkbox" data-chan-tier-toggle style="width:auto;" ${c.cfg.autoTier!==false?'checked':''}> auto</label>`;
+    });
+  }
+
+  body += sectionHead('Impostos e descontos calculados');
+  body += row('Comissão (R$)', c=>fmtR$(c.r.comissao));
+  body += row('Desconto PIS/COFINS s/ comissão (R$)', c=>fmtR$(c.r.descontoComissao));
+  body += row('Desconto PIS/COFINS/ICMS s/ frete (R$)', c=>fmtR$(c.r.descontoFrete));
+  body += row('Investimento Ads (R$)', c=>fmtR$(c.r.ads));
+  body += row('ICMS da operação (R$)', c=>fmtR$(c.r.icms));
+  body += row('Crédito presumido ICMS (R$)', c=>fmtR$(c.r.icmsCredPresumido));
+  body += row('DIFAL (R$)', c=>fmtR$(c.r.difal));
+  body += row('PIS (R$)', c=>fmtR$(c.r.pis));
+  body += row('COFINS (R$)', c=>fmtR$(c.r.cofins));
+  body += row('FCP (R$)', c=>fmtR$(c.r.fcp));
+  body += row('Margem de devolução (R$)', c=>fmtR$(c.r.margemDevolucao));
+  body += row('Despesas de envio (R$)', c=>fmtR$(c.r.despesasEnvio));
+
+  body += sectionHead('Resultado');
+  body += row('Receita líquida (R$)', c=>fmtR$(c.r.receitaLiquida), {cls:'result-row'});
+  body += row('CMV (R$)', c=>fmtR$(c.r.cmv));
+  body += row('Resultado bruto (R$)', c=>`<span class="${c.r.resultadoBruto>=0?'pos':'neg'}">${fmtR$(c.r.resultadoBruto)}</span>`, {cls:'result-row'});
+  body += row('Margem de contribuição (%)', c=>`<span class="${c.r.margem>=0?'pos':'neg'}">${fmtPct(c.r.margem)}</span>`, {cls:'result-row'});
+
+  body += sectionHead('Rebate (opcional)');
+  body += row('Rebate fixo por venda (R$)', c=> chanInputCell(c.key,'rebateFixo', c.cfg.rebateFixo));
+  body += row('Rebate percentual (%)', c=> chanInputCell(c.key,'rebatePct', c.cfg.rebatePct, {percent:true}));
+  body += row('Comissão incide sobre rebate?', c=>`<input type="checkbox" data-chan="${c.key}" data-chan-field="comissaoSobreRebate" data-chan-bool="true" ${c.cfg.comissaoSobreRebate?'checked':''}>`);
+  body += row('Resultado bruto final (R$)', c=>`<span class="${c.r.resultadoBrutoFinal>=0?'pos':'neg'}">${fmtR$(c.r.resultadoBrutoFinal)}</span>`, {cls:'result-row'});
+  body += row('Margem de contribuição final (%)', c=>`<span class="${c.r.margemFinal>=0?'pos':'neg'}">${fmtPct(c.r.margemFinal)}</span>`, {cls:'result-row'});
+
+  body += '</tbody>';
+
+  withFocusPreserved('chan-table', ()=>{
+    table.innerHTML = head + body;
+    table.querySelectorAll('input[data-chan]').forEach(inp=>{
+      inp.addEventListener('input', ()=>{
+        const key = inp.getAttribute('data-chan');
+        const field = inp.getAttribute('data-chan-field');
+        const isBool = inp.getAttribute('data-chan-bool')==='true';
+        const isPercent = inp.hasAttribute('data-percent') || ['comissaoPct','adsPct','rebatePct'].includes(field);
+        let val;
+        if(isBool){ val = inp.checked; }
+        else { val = inp.value===''?null:parseFloat(inp.value.replace(',','.')); if(isPercent && val!=null) val/=100; }
+        state.canais[key][field] = val;
+        saveState();
+        renderAll();
+      });
+    });
+    const tierToggle = table.querySelector('[data-chan-tier-toggle]');
+    if(tierToggle) tierToggle.addEventListener('change', ()=>{
+      state.canais.shopee.autoTier = tierToggle.checked;
+      saveState(); renderAll();
+    });
+  });
+
+  // KPIs de topo
+  const cmv = results.cmvResult;
+  const best = chans.reduce((a,b)=> (b.r.margem>a.r.margem?b:a));
+  document.getElementById('preco-kpis').innerHTML = `
+    <div class="kpi"><div class="l">CMV calculado</div><div class="v">${fmtR$(cmv.cmv)}</div></div>
+    <div class="kpi"><div class="l">Despesas de envio</div><div class="v">${fmtR$(results.env)}</div></div>
+    <div class="kpi"><div class="l">Alíq. ICMS de saída</div><div class="v">${fmtPct(results.S.s15)}</div></div>
+    <div class="kpi"><div class="l">DIFAL aplicado</div><div class="v">${fmtPct(results.S.s17)}</div></div>
+    <div class="kpi"><div class="l">Melhor margem</div><div class="v">${best.cfg.label}</div></div>`;
+
+  // status pill
+  const pill = document.getElementById('statusPill'), pillText = document.getElementById('statusText');
+  if(cmv.cmv>0){
+    pill.style.color='var(--pos)'; pill.style.background='var(--pos-soft)'; pillText.textContent='operacional';
+  } else {
+    pill.style.color='var(--neg)'; pill.style.background='var(--neg-soft)'; pillText.textContent='preencha os dados do produto';
+  }
+}
+
+function renderPrecificacao(){
+  const identTitle = document.getElementById('ident-title');
+  if(state.editingProductId){
+    const rec = state.products.find(r=>r.id===state.editingProductId);
+    identTitle.textContent = rec ? `Editando: ${rec.nome||'(sem nome)'}${rec.sku?' — '+rec.sku:''}` : 'Identificação do produto';
+  } else {
+    identTitle.textContent = 'Identificação do produto (novo)';
+  }
+  const sel = document.getElementById('fiscal-uf-destino');
+  if(sel && !sel.dataset.built){ fillUfSelect(sel, state.fiscal.ufDestino); sel.dataset.built='1'; sel.addEventListener('change', ()=>{ state.fiscal.ufDestino = sel.value; saveState(); renderAll(); }); }
+  renderChannelTable();
+}
+/* ===================== HISTÓRICO DE PRODUTOS ===================== */
+const expandedHistoryIds = new Set(); // controla quais linhas mostram a evolução expandida (não persiste — é só de UI)
+const expandedStateIds = new Set();   // controla quais linhas mostram o painel "margem por estado"
+const stateSimSelection = {};         // id -> {origin, channel} escolhidos no painel "margem por estado"
+
+// Simula o MESMO produto/canal salvo (mesmo PDV, comissão, frete) variando só o par origem→destino,
+// para isolar o efeito puramente geográfico/tributário sobre a margem.
+function simulateProductByState(rec, channelKey, originUf){
+  const baseCtx = ctxFromRecord(rec, false); // usa exatamente o que foi salvo, sem trocar por taxas atuais
+  return UF_LIST.map(uf=>{
+    const ctx = {
+      config: Object.assign({}, baseCtx.config, { ufArmazem: originUf }),
+      fiscal: Object.assign({}, baseCtx.fiscal, { ufDestino: uf }),
+      produto: baseCtx.produto,
+      devolucao: baseCtx.devolucao,
+      canais: baseCtx.canais
+    };
+    let ch, s15=0, s17=0;
+    try{
+      const res = computeAll(ctx);
+      ch = res.channels[channelKey];
+      s15 = res.S.s15; s17 = res.S.s17;
+    }catch(e){ ch = null; }
+    return {
+      uf,
+      icms: s15,
+      difal: s17,
+      pdv: ch ? ch.pdv : 0,
+      margem: ch ? ch.margemFinal : 0
+    };
+  }).sort((a,b)=>b.margem-a.margem);
+}
+
+function buildSnapshotFromState(){
+  return {
+    config: JSON.parse(JSON.stringify(state.config)),
+    fiscal: JSON.parse(JSON.stringify(state.fiscal)),
+    produto: JSON.parse(JSON.stringify(state.produto)),
+    devolucao: JSON.parse(JSON.stringify(state.devolucao)),
+    canais: JSON.parse(JSON.stringify(state.canais)),
+  };
+}
+
+function computeSavedResults(snap){
+  const results = computeAll(snap);
+  const savedResults = {};
+  Object.keys(results.channels).forEach(k=>{
+    const c = results.channels[k];
+    savedResults[k] = { pdv:c.pdv, margem:c.margem, margemFinal:c.margemFinal, resultadoBruto:c.resultadoBruto, resultadoBrutoFinal:c.resultadoBrutoFinal, cmv:c.cmv };
+  });
+  return savedResults;
+}
+
+function refreshBoundInputs(selector){
+  document.querySelectorAll(selector).forEach(el=>{
+    if(!el.hasAttribute('data-bind')) return;
+    setDisplayValueForBind(el, el.getAttribute('data-bind'));
+  });
+}
+
+function saveProductRecord(){
+  const p = state.produto;
+  if(!p.nome && !p.sku){
+    if(!confirm('Nenhum nome ou SKU foi preenchido. Salvar mesmo assim?')) return;
+  }
+  const snap = buildSnapshotFromState();
+  const savedResults = computeSavedResults(snap);
+  const now = Date.now();
+  const myName = (state.local && state.local.userName) || '';
+  const cloudOn = !!getCloudUrl();
+  if(state.editingProductId){
+    const rec = state.products.find(r=>r.id===state.editingProductId);
+    if(rec){
+      // guarda um retrato do que estava salvo ANTES de sobrescrever, para poder comparar depois
+      const prevKeys = Object.keys(rec.savedResults||{});
+      if(prevKeys.length){
+        if(!Array.isArray(rec.history)) rec.history = [];
+        const prevBest = prevKeys.reduce((a,b)=> rec.savedResults[b].margemFinal>rec.savedResults[a].margemFinal?b:a);
+        rec.history.push({
+          savedAt: rec.updatedAt,
+          canal: prevBest,
+          pdv: rec.savedResults[prevBest].pdv,
+          margemFinal: rec.savedResults[prevBest].margemFinal,
+          cmv: rec.savedResults[prevBest].cmv
+        });
+        if(rec.history.length > 30) rec.history = rec.history.slice(-30); // evita crescer sem limite
+      }
+      Object.assign(rec, snap, { nome:p.nome, sku:p.sku, fornecedor:p.fornecedor, linha:p.linha, updatedAt:now, savedResults,
+        criadoPorNome: rec.criadoPorNome || myName, atualizadoPorNome: myName || rec.atualizadoPorNome || '' });
+      saveState(); renderAll();
+      document.getElementById('ident-status').textContent = 'Atualizado em '+fmtDate(now)+'.'+(cloudOn?' Sincronizando na nuvem…':'');
+      cloudSaveProduct(rec).then(ok=>{
+        document.getElementById('ident-status').textContent = ok
+          ? 'Atualizado e sincronizado em '+fmtDate(now)+'.'
+          : (cloudOn ? 'Atualizado em '+fmtDate(now)+' (não foi possível sincronizar agora — ficou salvo neste navegador).' : 'Atualizado em '+fmtDate(now)+'.');
+      });
+      return;
+    }
+  }
+  const rec = Object.assign({ id: uid(), createdAt: now, updatedAt: now, criadoPorNome: myName, atualizadoPorNome: myName, history: [] }, snap,
+    { nome:p.nome, sku:p.sku, fornecedor:p.fornecedor, linha:p.linha, savedResults });
+  state.products.push(rec);
+  state.editingProductId = rec.id;
+  saveState();
+  renderAll();
+  document.getElementById('ident-status').textContent = 'Salvo em '+fmtDate(now)+'.'+(cloudOn?' Sincronizando na nuvem…':'');
+  cloudSaveProduct(rec).then(ok=>{
+    document.getElementById('ident-status').textContent = ok
+      ? 'Salvo e sincronizado em '+fmtDate(now)+'.'
+      : (cloudOn ? 'Salvo em '+fmtDate(now)+' (não foi possível sincronizar agora — ficou salvo neste navegador).' : 'Salvo em '+fmtDate(now)+'.');
+  });
+}
+
+function newProductForm(){
+  const def = defaultState();
+  state.produto = def.produto;
+  state.devolucao = def.devolucao;
+  state.canais = defaultChannels(state.marketplaceFees);
+  state.editingProductId = null;
+  saveState();
+  refreshBoundInputs('[data-bind^="produto."],[data-bind^="devolucao."]');
+  document.getElementById('ident-status').textContent = 'Formulário limpo — pronto para um novo produto.';
+  renderAll();
+}
+
+function loadProductRecord(id){
+  const rec = state.products.find(r=>r.id===id);
+  if(!rec) return;
+  state.produto = JSON.parse(JSON.stringify(rec.produto));
+  state.fiscal = JSON.parse(JSON.stringify(rec.fiscal));
+  state.devolucao = JSON.parse(JSON.stringify(rec.devolucao));
+  state.canais = JSON.parse(JSON.stringify(rec.canais));
+  state.editingProductId = rec.id;
+  saveState();
+  refreshBoundInputs('[data-bind]');
+  document.getElementById('ident-status').textContent = 'Editando registro salvo em '+fmtDate(rec.updatedAt)+' — salvar substitui esta versão.';
+  const btn = document.querySelector('.sidebar-nav button[data-tab="precificacao"]');
+  if(btn) btn.click();
+  renderAll();
+}
+
+function duplicateProductRecord(id){
+  const rec = state.products.find(r=>r.id===id);
+  if(!rec) return;
+  const copy = JSON.parse(JSON.stringify(rec));
+  copy.id = uid();
+  copy.nome = (rec.nome||'Produto') + ' (cópia)';
+  copy.createdAt = copy.updatedAt = Date.now();
+  copy.history = []; // é um produto novo — começa sem histórico de alterações
+  state.products.push(copy);
+  saveState();
+  renderHistorico();
+  cloudSaveProduct(copy);
+}
+
+function deleteProductRecord(id){
+  if(!confirm('Excluir esta precificação do histórico? Essa ação não pode ser desfeita.')) return;
+  state.products = state.products.filter(r=>r.id!==id);
+  if(state.editingProductId===id) state.editingProductId=null;
+  saveState();
+  renderHistorico();
+  cloudDeleteProduct(id);
+}
+
+function renderStatePanelRow(rec, bestKey, keys){
+  const sel = stateSimSelection[rec.id] || (stateSimSelection[rec.id] = { origin: state.config.ufArmazem, channel: bestKey });
+  const results = simulateProductByState(rec, sel.channel, sel.origin);
+  const savedDestino = rec.fiscal && rec.fiscal.ufDestino;
+  const manualIcms = rec.fiscal && isNum(rec.fiscal.aliqIcmsManual);
+  const maxMargem = Math.max(...results.map(r=>r.margem), 0.0001);
+  const minMargem = Math.min(...results.map(r=>r.margem), 0);
+  const range = (maxMargem - minMargem) || 1;
+
+  const channelOptions = keys.map(k=>{
+    const label = (defaultChannels(state.marketplaceFees)[k]||{}).label || k;
+    return `<option value="${k}" ${k===sel.channel?'selected':''}>${label}</option>`;
+  }).join('');
+  const ufOptions = UF_LIST.map(uf=>`<option value="${uf}" ${uf===sel.origin?'selected':''}>${uf}</option>`).join('');
+
+  const rows = results.map(r=>{
+    const isSaved = r.uf === savedDestino;
+    const pct = ((r.margem-minMargem)/range*100).toFixed(0);
+    const cls = r.margem>=0 ? 'pos' : 'neg';
+    return `<tr ${isSaved?'style="background:var(--accent-soft);"':''}>
+      <td style="text-align:left;font-weight:600;">${r.uf}${isSaved?' <span class="tag" style="margin-left:4px;">destino salvo</span>':''}</td>
+      <td>${fmtPct(r.icms)}</td>
+      <td>${fmtPct(r.difal)}</td>
+      <td class="${cls}" style="font-weight:600;">${fmtPct(r.margem)}</td>
+      <td style="min-width:90px;"><div class="mini-bar-track"><div class="mini-bar-fill" style="width:${pct}%;background:${r.margem>=0?'var(--pos)':'var(--neg)'};"></div></div></td>
+    </tr>`;
+  }).join('');
+
+  return `<tr><td colspan="10" style="background:var(--surface-alt);padding:14px;">
+    <div style="display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:10px;">
+      <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;">
+        Margem por estado — ${rec.nome||'produto'}
+      </div>
+      <span class="hint" style="margin:0;">mantendo o mesmo PDV/comissão/frete salvos, variando só a tributação</span>
+    </div>
+    ${manualIcms?'<div class="callout info" style="margin-bottom:10px;">Este produto tem uma alíquota de ICMS manual salva — por isso o ICMS não muda entre estados aqui; só o DIFAL varia.</div>':''}
+    <div class="row-inline" style="gap:10px;margin-bottom:12px;max-width:420px;">
+      <div class="field" style="margin:0;"><label>Canal simulado</label><select data-state-sel="channel" data-id="${rec.id}">${channelOptions}</select></div>
+      <div class="field" style="margin:0;"><label>UF de origem</label><select data-state-sel="origin" data-id="${rec.id}">${ufOptions}</select></div>
+    </div>
+    <div class="matrix-scroll" style="max-height:320px;">
+      <table style="width:100%;min-width:420px;border-collapse:collapse;">
+        <thead><tr>
+          <th style="text-align:left;font-size:10.5px;color:var(--muted);padding:4px 8px;">Destino</th>
+          <th style="font-size:10.5px;color:var(--muted);padding:4px 8px;">ICMS</th>
+          <th style="font-size:10.5px;color:var(--muted);padding:4px 8px;">DIFAL</th>
+          <th style="font-size:10.5px;color:var(--muted);padding:4px 8px;">Margem</th>
+          <th style="font-size:10.5px;color:var(--muted);padding:4px 8px;"></th>
+        </tr></thead>
+        <tbody style="font-size:12px;text-align:right;">${rows}</tbody>
+      </table>
+    </div>
+  </td></tr>`;
+}
+
+function renderHistorico(){
+  const buscaEl = document.getElementById('hist-busca');
+  const fSel = document.getElementById('hist-fornecedor'), lSel = document.getElementById('hist-linha');
+  if(!fSel.dataset.built){
+    fSel.dataset.built='1';
+    buscaEl.addEventListener('input', renderHistorico);
+    fSel.addEventListener('change', renderHistorico);
+    lSel.addEventListener('change', renderHistorico);
+  }
+  const fornecedores = Array.from(new Set(state.products.map(r=>r.fornecedor).filter(Boolean))).sort();
+  const linhas = Array.from(new Set(state.products.map(r=>r.linha).filter(Boolean))).sort();
+  const curF = fSel.value, curL = lSel.value;
+  fSel.innerHTML = '<option value="">Todos</option>'+fornecedores.map(f=>`<option ${f===curF?'selected':''}>${f}</option>`).join('');
+  lSel.innerHTML = '<option value="">Todas</option>'+linhas.map(l=>`<option ${l===curL?'selected':''}>${l}</option>`).join('');
+  document.getElementById('dl-fornecedores').innerHTML = fornecedores.map(f=>`<option value="${f}">`).join('');
+  document.getElementById('dl-linhas').innerHTML = linhas.map(l=>`<option value="${l}">`).join('');
+
+  const busca = (buscaEl.value||'').toLowerCase();
+  let list = state.products.slice().sort((a,b)=>b.updatedAt-a.updatedAt);
+  if(busca) list = list.filter(r=> (r.nome||'').toLowerCase().includes(busca) || (r.sku||'').toLowerCase().includes(busca));
+  if(fSel.value) list = list.filter(r=>r.fornecedor===fSel.value);
+  if(lSel.value) list = list.filter(r=>r.linha===lSel.value);
+
+  document.getElementById('hist-empty').style.display = state.products.length? 'none':'flex';
+
+  const table = document.getElementById('hist-table');
+  withFocusPreserved('hist-table', ()=>{
+    if(!list.length){
+      table.innerHTML = state.products.length ? '<tbody><tr><td style="padding:14px;color:var(--muted);">Nenhum resultado para este filtro.</td></tr></tbody>' : '';
+      return;
+    }
+    let html = `<thead><tr><th>Produto</th><th>Fornecedor</th><th>Linha</th><th>Salvo em</th><th>Melhor canal</th><th>Margem salva</th><th>Desde o cadastro anterior</th><th>Margem hoje</th><th>Δ vs. hoje</th><th>Ações</th></tr></thead><tbody>`;
+    list.forEach(rec=>{
+      const keys = Object.keys(rec.savedResults||{});
+      if(!keys.length) return;
+      const bestKey = keys.reduce((a,b)=> rec.savedResults[b].margemFinal>rec.savedResults[a].margemFinal?b:a);
+      const savedMargem = rec.savedResults[bestKey].margemFinal;
+      const savedPdv = rec.savedResults[bestKey].pdv;
+      let hojeMargem = null, delta = null;
+      try{
+        const ctxHoje = ctxFromRecord(rec, true);
+        const resHoje = computeAll(ctxHoje);
+        hojeMargem = resHoje.channels[bestKey].margemFinal;
+        delta = hojeMargem - savedMargem;
+      }catch(e){}
+      const deltaCls = delta==null ? '' : (delta>=0?'pos':'neg');
+      const deltaTxt = delta==null ? '—' : (delta>=0?'+':'')+fmtPct(delta);
+      const label = (defaultChannels(state.marketplaceFees)[bestKey]||{}).label || bestKey;
+      const authorName = rec.atualizadoPorNome || rec.criadoPorNome || '';
+
+      // variação desde o cadastro anterior (comparando com o mesmo canal, quando existe)
+      const hist = Array.isArray(rec.history) ? rec.history : [];
+      let vsPrevHtml = '<span style="color:var(--muted);">primeiro cadastro</span>';
+      if(hist.length){
+        const prev = hist[hist.length-1];
+        const pdvDelta = savedPdv - prev.pdv;
+        const margemDelta = savedMargem - prev.margemFinal;
+        const pdvCls = pdvDelta>=0?'pos':'neg', margemCls = margemDelta>=0?'pos':'neg';
+        const canalMudou = prev.canal !== bestKey;
+        vsPrevHtml = `<span class="${pdvCls}">${pdvDelta>=0?'+':''}${fmtR$(pdvDelta)}</span> · <span class="${margemCls}">${margemDelta>=0?'+':''}${fmtPct(margemDelta)}</span>`
+          + (canalMudou ? `<div style="color:var(--muted);font-size:10px;">canal mudou de ${prev.canal}</div>` : '');
+      }
+      const hasHistory = hist.length>0;
+      const expanded = expandedHistoryIds.has(rec.id);
+
+      html += `<tr>
+        <td>
+          ${hasHistory?`<button type="button" class="ghost" data-hist-action="toggle" data-id="${rec.id}" style="padding:2px 7px;font-size:10px;margin-right:6px;">${expanded?'▾':'▸'} ${hist.length}</button>`:''}
+          <strong>${rec.nome||'(sem nome)'}</strong>${rec.sku?`<div style="color:var(--muted);font-size:10.5px;">${rec.sku}</div>`:''}
+        </td>
+        <td>${rec.fornecedor||'—'}</td>
+        <td>${rec.linha||'—'}</td>
+        <td>${fmtDate(rec.updatedAt)}${authorName?`<div style="color:var(--muted);font-size:10.5px;">por ${authorName}</div>`:''}</td>
+        <td>${label}</td>
+        <td>${fmtPct(savedMargem)}</td>
+        <td style="font-size:11.5px;">${vsPrevHtml}</td>
+        <td>${hojeMargem==null?'—':fmtPct(hojeMargem)}</td>
+        <td class="${deltaCls}">${deltaTxt}</td>
+        <td style="white-space:nowrap;">
+          <button class="ghost" data-hist-action="state" data-id="${rec.id}" title="Ver margem por estado">${svgIcon('globe',14)}</button>
+          <button class="ghost" data-hist-action="load" data-id="${rec.id}">Carregar</button>
+          <button class="ghost" data-hist-action="dup" data-id="${rec.id}">Duplicar</button>
+          <button class="ghost" data-hist-action="del" data-id="${rec.id}">Excluir</button>
+        </td>
+      </tr>`;
+
+      if(expanded && hasHistory){
+        const rows = hist.slice().reverse().map(h=>`<tr>
+          <td style="color:var(--muted);">${fmtDate(h.savedAt)}</td>
+          <td>${(defaultChannels(state.marketplaceFees)[h.canal]||{}).label || h.canal}</td>
+          <td>${fmtR$(h.pdv)}</td>
+          <td>${fmtPct(h.margemFinal)}</td>
+        </tr>`).join('');
+        html += `<tr><td colspan="10" style="background:var(--surface-alt);padding:10px 14px;">
+          <div style="font-size:11px;font-weight:600;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em;">Evolução deste produto</div>
+          <table style="width:auto;min-width:360px;"><thead><tr>
+            <th style="text-align:left;font-size:10.5px;color:var(--muted);padding:2px 10px 2px 0;">Data</th>
+            <th style="text-align:left;font-size:10.5px;color:var(--muted);padding:2px 10px;">Canal</th>
+            <th style="text-align:left;font-size:10.5px;color:var(--muted);padding:2px 10px;">PDV</th>
+            <th style="text-align:left;font-size:10.5px;color:var(--muted);padding:2px 10px;">Margem</th>
+          </tr></thead><tbody style="font-size:11.5px;">${rows}</tbody></table>
+        </div></td></tr>`;
+      }
+
+      if(expandedStateIds.has(rec.id)){
+        html += renderStatePanelRow(rec, bestKey, keys);
+      }
+    });
+    html += '</tbody>';
+    table.innerHTML = html;
+    table.querySelectorAll('button[data-hist-action]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const id = btn.getAttribute('data-id'), action = btn.getAttribute('data-hist-action');
+        if(action==='load') loadProductRecord(id);
+        else if(action==='dup') duplicateProductRecord(id);
+        else if(action==='del') deleteProductRecord(id);
+        else if(action==='toggle'){
+          if(expandedHistoryIds.has(id)) expandedHistoryIds.delete(id); else expandedHistoryIds.add(id);
+          renderHistorico();
+        }
+        else if(action==='state'){
+          if(expandedStateIds.has(id)) expandedStateIds.delete(id); else expandedStateIds.add(id);
+          renderHistorico();
+        }
+      });
+    });
+    table.querySelectorAll('select[data-state-sel]').forEach(sel=>{
+      sel.addEventListener('change', ()=>{
+        const id = sel.getAttribute('data-id');
+        const field = sel.getAttribute('data-state-sel');
+        if(!stateSimSelection[id]) stateSimSelection[id] = { origin: state.config.ufArmazem, channel: null };
+        stateSimSelection[id][field] = sel.value;
+        renderHistorico();
+      });
+    });
+  });
+}
+/* ===================== GMV & PONTO DE EQUILÍBRIO ===================== */
+const GMV_FIELDS = [
+  {k:'fat', label:'Faturamento (R$) — média mensal'},
+  {k:'imp', label:'Impostos acumulados (R$)'},
+  {k:'cmv', label:'CMV acumulado (R$)'},
+  {k:'com', label:'Comissões acumuladas (R$)'},
+  {k:'fre', label:'Fretes acumulados (R$)'},
+  {k:'emb', label:'Embalagens acumuladas (R$)'},
+  {k:'ins', label:'Insumos acumulados (R$)'},
+  {k:'pla', label:'Plataformas e sistemas (R$)'},
+  {k:'fol', label:'Folha de pagamento (R$)'},
+  {k:'con', label:'Contas de consumo (R$)'},
+];
+
+function gmvMonthCalc(m){
+  const fat = m.fat;
+  if(fat==null || fat==='') return null;
+  const imp=m.imp||0, cmv=m.cmv||0, com=m.com||0, fre=m.fre||0, emb=m.emb||0, ins=m.ins||0, pla=m.pla||0, fol=m.fol||0, con=m.con||0;
+  const receitaLiquida = fat - imp;                                   // C10
+  const lucroBruto = receitaLiquida - cmv;                            // C13
+  const custosVariaveis = imp+cmv+com+fre+emb+ins;                    // C25
+  const custosFixos = pla+fol+con;                                    // C26
+  const despesasOperacao = custosVariaveis+custosFixos;               // C27
+  const margemContribuicao = fat!==0 ? (fat-custosVariaveis)/fat : 0; // C19
+  const pontoEquilibrio = margemContribuicao>0 ? custosFixos/margemContribuicao : 0; // C29
+  const resultadoLiquido = fat - despesasOperacao;                    // C30
+  return { receitaLiquida, lucroBruto, custosVariaveis, custosFixos, despesasOperacao, margemContribuicao, pontoEquilibrio, resultadoLiquido };
+}
+
+function renderGmv(){
+  // selects do bloco "aplicar"
+  const monthSel = document.getElementById('gmv-apply-month');
+  const chanSel = document.getElementById('gmv-apply-channel');
+  if(!monthSel.dataset.built){
+    monthSel.innerHTML = MONTHS.map((m,i)=>`<option value="${i}">${m}</option>`).join('');
+    chanSel.innerHTML = CHANNEL_ORDER.map(k=>`<option value="${k}">${state.canais[k].label}</option>`).join('');
+    monthSel.dataset.built='1';
+    document.getElementById('btnApplyGmv').addEventListener('click', applyPrecificacaoToGmv);
+  } else {
+    chanSel.innerHTML = CHANNEL_ORDER.map(k=>`<option value="${k}">${state.canais[k].label}</option>`).join('');
+  }
+  const results = window.__lastResults || computeAll();
+  const r = results.channels[chanSel.value] || results.channels.site;
+  document.getElementById('gmv-apply-hint').textContent =
+    `Prévia (${state.canais[chanSel.value] ? state.canais[chanSel.value].label : ''}): PDV ${fmtR$(r.pdv)} · resultado bruto por unidade ${fmtR$(r.resultadoBruto)} · margem ${fmtPct(r.margem)}.`;
+
+  const table = document.getElementById('gmv-table');
+  let head = '<thead><tr><th>Indicador</th>' + MONTHS.map(m=>`<th>${m}</th>`).join('') + '</tr></thead><tbody>';
+  let body = '';
+  GMV_FIELDS.forEach(f=>{
+    body += `<tr><td>${f.label}</td>` + state.gmv.months.map((m,i)=>
+      `<td><input type="number" step="0.01" data-gmv-month="${i}" data-gmv-field="${f.k}" value="${m[f.k]!=null?m[f.k]:''}"></td>`
+    ).join('') + '</tr>';
+  });
+  body += '<tr class="sep"><td></td>' + MONTHS.map(()=>'<td></td>').join('') + '</tr>';
+  const calcs = state.gmv.months.map(gmvMonthCalc);
+  function calcRow(label, fn){
+    return `<tr class="result"><td>${label}</td>` + calcs.map(c=>`<td>${c?fn(c):'—'}</td>`).join('') + '</tr>';
+  }
+  body += calcRow('Receita líquida (R$)', c=>fmtR$(c.receitaLiquida));
+  body += calcRow('Lucro bruto (R$)', c=>fmtR$(c.lucroBruto));
+  body += calcRow('Margem de contribuição (%)', c=>fmtPct(c.margemContribuicao));
+  body += calcRow('Custos variáveis (R$)', c=>fmtR$(c.custosVariaveis));
+  body += calcRow('Custos fixos (R$)', c=>fmtR$(c.custosFixos));
+  body += calcRow('Ponto de equilíbrio — faturamento alvo (R$)', c=>fmtR$(c.pontoEquilibrio));
+  body += calcRow('Resultado líquido (R$)', c=>fmtR$(c.resultadoLiquido));
+  body += '</tbody>';
+
+  withFocusPreserved('gmv-table', ()=>{
+    table.innerHTML = head+body;
+    table.querySelectorAll('input[data-gmv-month]').forEach(inp=>{
+      inp.addEventListener('input', ()=>{
+        const i = parseInt(inp.getAttribute('data-gmv-month'));
+        const field = inp.getAttribute('data-gmv-field');
+        state.gmv.months[i][field] = inp.value===''?null:parseFloat(inp.value.replace(',','.'));
+        saveState();
+        renderGmv();
+        scheduleCloudGmvWrite();
+      });
+    });
+  });
+}
+
+function applyPrecificacaoToGmv(){
+  const monthIdx = parseInt(document.getElementById('gmv-apply-month').value);
+  const chanKey = document.getElementById('gmv-apply-channel').value;
+  const qty = parseFloat(document.getElementById('gmv-apply-qty').value)||0;
+  const results = window.__lastResults || computeAll();
+  const r = results.channels[chanKey];
+  const m = state.gmv.months[monthIdx];
+  m.fat = round2(r.pdv*qty);
+  m.imp = round2((r.icms+r.difal+r.pis+r.cofins+r.fcp)*qty);
+  m.cmv = round2(r.cmv*qty);
+  m.com = round2(r.comissao*qty);
+  m.fre = round2(r.frete*qty);
+  m.emb = round2(r.despesasEnvio*qty);
+  m.ins = m.ins||0;
+  saveState();
+  renderGmv();
+  scheduleCloudGmvWrite();
+}
+function round2(v){ return Math.round(v*100)/100; }
+
+/* ===================== PRESERVAÇÃO DE FOCO EM RE-RENDER ===================== */
+function withFocusPreserved(containerId, renderFn){
+  const container = document.getElementById(containerId);
+  const active = document.activeElement;
+  let sel = null;
+  const attrNames = ['data-chan','data-chan-field','data-chan-bool','data-gmv-month','data-gmv-field'];
+  if(container && active && container.contains(active)){
+    const attrs = {};
+    attrNames.forEach(a=>{ if(active.hasAttribute(a)) attrs[a]=active.getAttribute(a); });
+    if(Object.keys(attrs).length){
+      sel = { attrs, start: active.selectionStart, end: active.selectionEnd };
+    }
+  }
+  renderFn();
+  if(sel){
+    const selector = Object.entries(sel.attrs).map(([k,v])=>`[${k}="${v.replace(/"/g,'')}"]`).join('');
+    const el = container.querySelector(selector);
+    if(el){
+      el.focus();
+      if(el.setSelectionRange && sel.start!=null && el.type!=='number'){
+        try{ el.setSelectionRange(sel.start, sel.end); }catch(e){}
+      }
+    }
+  }
+}
+
+/* ===================== TEMA CLARO/ESCURO ===================== */
+function effectiveIsDark(){
+  const t = state.local.theme || 'system';
+  if(t==='dark') return true;
+  if(t==='light') return false;
+  return !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+}
+function applyTheme(){
+  const t = state.local.theme || 'system';
+  if(t==='system'){ document.documentElement.removeAttribute('data-theme'); }
+  else { document.documentElement.setAttribute('data-theme', t); }
+  const btn = document.getElementById('btnThemeToggle');
+  if(btn){
+    const dark = effectiveIsDark();
+    btn.innerHTML = svgIcon(dark ? 'sun' : 'moon', 17);
+    btn.title = dark ? 'Mudar para modo claro' : 'Mudar para modo escuro';
+  }
+}
+function toggleTheme(){
+  state.local.theme = effectiveIsDark() ? 'light' : 'dark';
+  saveState();
+  applyTheme();
+}
+
+/* ===================== BOOTSTRAP / NAVEGAÇÃO ===================== */
+function renderAll(){
+  renderConfig();
+  renderIcms();
+  renderMarketplaces();
+  renderPrecificacao();
+  renderHistorico();
+  renderGmv();
+  renderVisaoGeral();
+}
+
+function moveTabIndicator(btn){
+  const indicator = document.getElementById('tabIndicator');
+  const track = document.getElementById('tabsTrack');
+  if(!indicator || !track || !btn) return;
+  const trackRect = track.getBoundingClientRect();
+  const btnRect = btn.getBoundingClientRect();
+  indicator.style.height = btnRect.height + 'px';
+  indicator.style.transform = `translateY(${btnRect.top - trackRect.top}px)`;
+}
+
+function openSidebar(){
+  document.getElementById('sidebar').classList.add('open');
+  document.getElementById('sidebarBackdrop').classList.add('show');
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarBackdrop').classList.remove('show');
+}
+
+function initTabs(){
+  document.getElementById('tabNav').addEventListener('click', e=>{
+    const btn = e.target.closest('button[data-tab]');
+    if(!btn) return;
+    document.querySelectorAll('.sidebar-nav button').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('section.tab').forEach(s=>s.classList.remove('active'));
+    document.getElementById('tab-'+btn.getAttribute('data-tab')).classList.add('active');
+    moveTabIndicator(btn);
+    closeSidebar(); // no mobile, escolher uma aba já fecha o menu
+  });
+  window.addEventListener('resize', ()=>{
+    const active = document.querySelector('.sidebar-nav button.active');
+    if(active) moveTabIndicator(active);
+  });
+  const btnOpen = document.getElementById('btnSidebarOpen');
+  const btnClose = document.getElementById('btnSidebarClose');
+  const backdrop = document.getElementById('sidebarBackdrop');
+  if(btnOpen) btnOpen.addEventListener('click', openSidebar);
+  if(btnClose) btnClose.addEventListener('click', closeSidebar);
+  if(backdrop) backdrop.addEventListener('click', closeSidebar);
+  // posição inicial (após o layout aplicar as fontes/estilos)
+  requestAnimationFrame ? requestAnimationFrame(()=>{
+    const active = document.querySelector('.sidebar-nav button.active');
+    if(active) moveTabIndicator(active);
+  }) : moveTabIndicator(document.querySelector('.sidebar-nav button.active'));
+}
+
+document.getElementById('btnReset').addEventListener('click', ()=>{
+  if(!confirm('Restaurar Configurações, ICMS, Marketplaces e o formulário de Precificação para os padrões originais?\n\nO histórico de produtos salvos NÃO será apagado.')) return;
+  const keepProducts = state.products;
+  const keepLocal = state.local;
+  state = defaultState();
+  state.products = keepProducts;
+  state.local = keepLocal;
+  saveState();
+  document.getElementById('cfg-uf').innerHTML='';
+  document.getElementById('icms-origem').innerHTML='';
+  document.getElementById('icms-destino').innerHTML='';
+  document.getElementById('mkt-table').dataset.built='';
+  document.getElementById('fiscal-uf-destino').dataset.built='';
+  document.getElementById('gmv-apply-month').dataset.built='';
+  refreshBoundInputs('[data-bind]');
+  renderAll();
+  scheduleCloudConfigWrite();
+  scheduleCloudGmvWrite();
+});
+
+document.getElementById('btnSaveProduct').addEventListener('click', saveProductRecord);
+document.getElementById('btnNewProduct').addEventListener('click', newProductForm);
+document.getElementById('btnConnectCloud').addEventListener('click', reconnectCloud);
+const secretFieldRefreshers = [];
+function wireSecretField(inputId, btnId){
+  const inp = document.getElementById(inputId), btn = document.getElementById(btnId);
+  function refreshBtn(){
+    if(inp.readOnly){ btn.textContent = 'Alterar'; btn.title = 'Definir um novo valor'; }
+    else { btn.textContent = inp.type==='password' ? '👁' : '🙈'; btn.title = 'Mostrar/ocultar'; }
+  }
+  btn.addEventListener('click', ()=>{
+    if(inp.readOnly){
+      // "Alterar": limpa de vez o valor salvo — a partir daqui só dá pra digitar um novo, nunca reler o antigo.
+      const path = inp.getAttribute('data-bind');
+      setPath(state, path, '');
+      saveState();
+      inp.readOnly = false;
+      inp.value = '';
+      inp.type = 'password';
+      inp.classList.remove('locked-field');
+      inp.focus();
+    } else {
+      inp.type = inp.type==='password' ? 'text' : 'password';
+    }
+    refreshBtn();
+  });
+  refreshBtn();
+  secretFieldRefreshers.push(refreshBtn);
+}
+function refreshSecretFieldButtons(){ secretFieldRefreshers.forEach(fn=>fn()); }
+wireSecretField('cloud-url', 'btnToggleCloudUrl');
+wireSecretField('cloud-password', 'btnToggleCloudPass');
+function goToTab(tabName){
+  const btn = document.querySelector(`.sidebar-nav button[data-tab="${tabName}"]`);
+  if(btn) btn.click();
+}
+document.getElementById('btnOverviewNewProduct').addEventListener('click', ()=>{ goToTab('precificacao'); newProductForm(); });
+document.getElementById('btnOverviewHistorico').addEventListener('click', ()=>goToTab('historico'));
+document.getElementById('btnOverviewGmv').addEventListener('click', ()=>goToTab('gmv'));
+
+initTabs();
+bindGenericInputs(document);
+renderAll();
+applyTheme();
+document.getElementById('btnThemeToggle').addEventListener('click', toggleTheme);
+initLockScreen();
+initCloudSync();
+/* ===================== SINCRONIZAÇÃO EM NUVEM (Google Planilhas via Apps Script) =====================
+   Este app fala com um backend simples publicado como "Web App" do Google Apps Script, que lê e
+   grava numa Google Planilha. Funciona em qualquer hospedagem (GitHub Pages, Netlify, arquivo local)
+   e para qualquer pessoa com o link — não depende de conta ou workspace do Claude.
+   Se o campo de URL estiver vazio, o app funciona 100% no navegador local (localStorage), como antes.
+   Toda chamada leva a senha de acesso; o próprio backend recusa sem ela (verifyPassword_ no Code.gs) —
+   então quem só tiver a URL, sem a senha, não consegue ler nem gravar nada na planilha. */
+let applyingRemote = false;
+let cloudConfigTimer = null, cloudGmvTimer = null, cloudPollTimer = null;
+let lastConfigJson = null, lastGmvJson = null;
+
+function getCloudUrl(){ return (state.local && state.local.cloudUrl || '').trim(); }
+function getCloudPass(){ return (state.local && state.local.appPassword || '').trim(); }
+
+function setCloudStatus(mode){
+  const el = document.getElementById('cloudStatus');
+  if(!el) return;
+  const map = {
+    cloud:   {text:'☁️ Sincronizado na nuvem', cls:'cloud-on'},
+    syncing: {text:'☁️ Sincronizando…',         cls:'cloud-syncing'},
+    error:   {text:'⚠️ Nuvem configurada, mas sem resposta', cls:'cloud-off'},
+    auth:    {text:'🔒 Senha incorreta',        cls:'cloud-off'},
+    local:   {text:'Somente neste navegador',   cls:'cloud-off'},
+  };
+  const m = map[mode] || map.local;
+  el.textContent = m.text;
+  el.className = 'cloud-pill '+m.cls;
+}
+
+async function cloudFetch(action, method, payload){
+  const base = getCloudUrl();
+  if(!base) return null;
+  const pass = getCloudPass();
+  try{
+    let res;
+    if(method==='GET'){
+      const sep = base.includes('?') ? '&' : '?';
+      res = await fetch(base + sep + 'action=' + encodeURIComponent(action) + '&pass=' + encodeURIComponent(pass), { method:'GET' });
+    } else {
+      // text/plain evita o preflight de CORS que o Apps Script não responde bem
+      res = await fetch(base, {
+        method:'POST',
+        headers:{ 'Content-Type':'text/plain;charset=utf-8' },
+        body: JSON.stringify(Object.assign({ action, pass }, payload||{}))
+      });
+    }
+    if(!res.ok) return null;
+    return await res.json();
+  }catch(e){ return null; }
+}
+
+function applyRemoteConfig(remote){
+  applyingRemote = true;
+  if(remote.config) state.config = remote.config;
+  if(remote.fiscal) state.fiscal = Object.assign({}, state.fiscal, remote.fiscal);
+  if(remote.marketplaceFees) state.marketplaceFees = remote.marketplaceFees;
+  applyingRemote = false;
+  saveState();
+  refreshBoundInputs('[data-bind]');
+  const mktTable = document.getElementById('mkt-table');
+  if(mktTable) mktTable.dataset.built = '';
+  const uf = document.getElementById('cfg-uf'); if(uf) uf.innerHTML='';
+  renderAll();
+}
+
+async function refreshProductsFromCloud(){
+  const res = await cloudFetch('listProducts','GET');
+  if(res && res.ok && Array.isArray(res.data)){
+    state.products = res.data;
+    saveState();
+    renderHistorico();
+  }
+}
+
+async function initCloudSync(){
+  const url = getCloudUrl();
+  if(!url){ setCloudStatus('local'); hideLockScreen(); return; }
+  setCloudStatus('syncing');
+  let sawAnyOk = false, sawAuthError = false;
+
+  const cfgRes = await cloudFetch('getConfig','GET');
+  if(cfgRes && cfgRes.ok){
+    sawAnyOk = true;
+    if(cfgRes.data){ applyRemoteConfig(cfgRes.data); lastConfigJson = JSON.stringify(cfgRes.data); }
+    else { await cloudFetch('setConfig','POST', {data:{config:state.config, fiscal:state.fiscal, marketplaceFees:state.marketplaceFees}}); }
+  } else if(cfgRes && cfgRes.code==='auth'){ sawAuthError = true; }
+
+  if(!sawAuthError){
+    const gmvRes = await cloudFetch('getGmv','GET');
+    if(gmvRes && gmvRes.ok){
+      sawAnyOk = true;
+      if(gmvRes.data && gmvRes.data.months){
+        applyingRemote = true; state.gmv.months = gmvRes.data.months; applyingRemote = false; saveState();
+        lastGmvJson = JSON.stringify(gmvRes.data.months);
+      } else { await cloudFetch('setGmv','POST', {data:{months:state.gmv.months}}); }
+    } else if(gmvRes && gmvRes.code==='auth'){ sawAuthError = true; }
+  }
+
+  if(!sawAuthError) await refreshProductsFromCloud();
+
+  if(sawAuthError){
+    setCloudStatus('auth');
+    showLockScreen('Senha incorreta. Confira com quem configurou a nuvem e tente de novo.');
+  } else if(sawAnyOk){
+    setCloudStatus('cloud');
+    hideLockScreen();
+    refreshBoundInputs('[data-bind]'); // trava os campos de URL/senha (nunca reexibe o valor após conectar)
+    refreshSecretFieldButtons();
+    startCloudPolling();
+  } else {
+    setCloudStatus('error');
+  }
+}
+
+function startCloudPolling(){
+  clearInterval(cloudPollTimer);
+  cloudPollTimer = setInterval(async ()=>{
+    if(applyingRemote || !getCloudUrl()) return;
+    const cfgRes = await cloudFetch('getConfig','GET');
+    if(cfgRes && cfgRes.code==='auth'){ setCloudStatus('auth'); showLockScreen('Senha incorreta. Confira com quem configurou a nuvem e tente de novo.'); clearInterval(cloudPollTimer); return; }
+    if(cfgRes && cfgRes.ok && cfgRes.data){
+      const j = JSON.stringify(cfgRes.data);
+      if(j !== lastConfigJson){ lastConfigJson = j; applyRemoteConfig(cfgRes.data); }
+    }
+    const gmvRes = await cloudFetch('getGmv','GET');
+    if(gmvRes && gmvRes.ok && gmvRes.data && gmvRes.data.months){
+      const j = JSON.stringify(gmvRes.data.months);
+      if(j !== lastGmvJson){ lastGmvJson = j; applyingRemote=true; state.gmv.months=gmvRes.data.months; applyingRemote=false; saveState(); renderGmv(); }
+    }
+    await refreshProductsFromCloud();
+  }, 20000);
+}
+
+function scheduleCloudConfigWrite(){
+  if(!getCloudUrl() || applyingRemote) return;
+  clearTimeout(cloudConfigTimer);
+  setCloudStatus('syncing');
+  cloudConfigTimer = setTimeout(async ()=>{
+    const data = { config: state.config, fiscal: state.fiscal, marketplaceFees: state.marketplaceFees };
+    const res = await cloudFetch('setConfig','POST', {data});
+    lastConfigJson = JSON.stringify(data);
+    setCloudStatus(res && res.ok ? 'cloud' : (res && res.code==='auth' ? 'auth' : 'error'));
+  }, 900);
+}
+
+function scheduleCloudGmvWrite(){
+  if(!getCloudUrl() || applyingRemote) return;
+  clearTimeout(cloudGmvTimer);
+  cloudGmvTimer = setTimeout(async ()=>{
+    await cloudFetch('setGmv','POST', {data:{months: state.gmv.months}});
+    lastGmvJson = JSON.stringify(state.gmv.months);
+  }, 900);
+}
+
+async function cloudSaveProduct(rec){
+  if(!getCloudUrl()) return false;
+  const withName = Object.assign({}, rec, {
+    criadoPorNome: rec.criadoPorNome || state.local.userName || '',
+    atualizadoPorNome: state.local.userName || rec.atualizadoPorNome || ''
+  });
+  const res = await cloudFetch('saveProduct','POST', {data:withName});
+  if(res && res.ok) await refreshProductsFromCloud();
+  return !!(res && res.ok);
+}
+async function cloudDeleteProduct(id){
+  if(!getCloudUrl()) return false;
+  const res = await cloudFetch('deleteProduct','POST', {id});
+  if(res && res.ok) await refreshProductsFromCloud();
+  return !!(res && res.ok);
+}
+
+function reconnectCloud(){
+  clearInterval(cloudPollTimer);
+  initCloudSync();
+}
+
+/* ---- Tela de bloqueio: aparece quando a nuvem já está configurada mas a senha falhou ---- */
+function showLockScreen(message){
+  const el = document.getElementById('lockScreen');
+  if(!el) return;
+  document.getElementById('lock-error').textContent = message || '';
+  el.style.display = 'flex';
+}
+function hideLockScreen(){
+  const el = document.getElementById('lockScreen');
+  if(el) el.style.display = 'none';
+}
+function initLockScreen(){
+  const btn = document.getElementById('btnUnlock');
+  const inp = document.getElementById('lock-password');
+  if(!btn || !inp) return;
+  const submit = ()=>{
+    state.local.appPassword = inp.value;
+    saveState();
+    refreshBoundInputs('[data-bind]'); // mantém o campo de senha em Configurações bloqueado (com pontos), nunca mostra o valor digitado aqui
+    reconnectCloud();
+  };
+  btn.addEventListener('click', submit);
+  inp.addEventListener('keydown', (e)=>{ if(e.key==='Enter') submit(); });
+}
+/* ===================== VISÃO GERAL ===================== */
+function computeOverviewStats(){
+  const rows = state.products.map(rec=>{
+    const keys = Object.keys(rec.savedResults||{});
+    if(!keys.length) return null;
+    const bestKey = keys.reduce((a,b)=> rec.savedResults[b].margemFinal>rec.savedResults[a].margemFinal?b:a);
+    let margemHoje = rec.savedResults[bestKey].margemFinal;
+    try{
+      const resHoje = computeAll(ctxFromRecord(rec, true));
+      margemHoje = resHoje.channels[bestKey].margemFinal;
+    }catch(e){}
+    return { rec, bestKey, margemHoje };
+  }).filter(Boolean);
+
+  const total = rows.length;
+  const mediaMargem = total ? rows.reduce((s,r)=>s+r.margemHoje,0)/total : 0;
+  const meta = state.fiscal.margemAlvo || 0;
+  const abaixoDaMeta = rows.filter(r=>r.margemHoje < meta).length;
+
+  function agrupa(campo){
+    const grupos = {};
+    rows.forEach(r=>{
+      const chave = r.rec[campo] || '(sem '+(campo==='fornecedor'?'fornecedor':'linha')+')';
+      if(!grupos[chave]) grupos[chave] = { count:0, soma:0 };
+      grupos[chave].count++;
+      grupos[chave].soma += r.margemHoje;
+    });
+    return Object.entries(grupos)
+      .map(([nome,g])=>({ nome, count:g.count, media: g.soma/g.count }))
+      .sort((a,b)=> b.count-a.count)
+      .slice(0,6);
+  }
+
+  const melhores = rows.slice().sort((a,b)=>b.margemHoje-a.margemHoje).slice(0,5);
+  const piores = rows.slice().sort((a,b)=>a.margemHoje-b.margemHoje).slice(0,5);
+
+  return { total, mediaMargem, abaixoDaMeta, porFornecedor: agrupa('fornecedor'), porLinha: agrupa('linha'), melhores, piores };
+}
+
+function latestFilledGmvMonth(){
+  const months = state.gmv.months;
+  for(let i=months.length-1;i>=0;i--){
+    if(months[i].fat!=null){
+      return { label: MONTHS[i], calc: gmvMonthCalc(months[i]) };
+    }
+  }
+  return null;
+}
+
+function renderVisaoGeral(){
+  const stats = computeOverviewStats();
+  const gmvAtual = latestFilledGmvMonth();
+
+  const kpis = [
+    { l:'Produtos no histórico', v: stats.total },
+    { l:'Margem média (hoje)', v: fmtPct(stats.mediaMargem) },
+    { l:'Abaixo da margem alvo', v: stats.abaixoDaMeta + ' de ' + stats.total, warn: stats.abaixoDaMeta>0 },
+  ];
+  if(gmvAtual){
+    kpis.push({ l:'Resultado líquido — '+gmvAtual.label, v: fmtR$(gmvAtual.calc.resultadoLiquido) });
+  }
+  document.getElementById('overview-kpis').innerHTML = kpis.map(k=>
+    `<div class="kpi" ${k.warn?'style="border-left:3px solid var(--neg);"':''}><div class="l">${k.l}</div><div class="v">${k.v}</div></div>`
+  ).join('');
+
+  function rankCard(title, icon, list, emptyMsg){
+    if(!list.length) return `<div class="card"><h2><span class="icon-chip">${icon}</span>${title}</h2><p class="desc">${emptyMsg}</p></div>`;
+    const rows = list.map(r=>{
+      const label = (defaultChannels(state.marketplaceFees)[r.bestKey]||{}).label || r.bestKey;
+      return `<div class="rank-row">
+        <div class="name">${r.rec.nome||'(sem nome)'}<div class="sub">${label}${r.rec.fornecedor?' · '+r.rec.fornecedor:''}</div></div>
+        <strong class="${r.margemHoje>=0?'pos':'neg'}" style="white-space:nowrap;">${fmtPct(r.margemHoje)}</strong>
+      </div>`;
+    }).join('');
+    return `<div class="card"><h2><span class="icon-chip">${icon}</span>${title}</h2>${rows}</div>`;
+  }
+  document.getElementById('overview-rankings').innerHTML =
+    rankCard('Melhores margens (hoje)', svgIcon('trophy'), stats.melhores, 'Salve produtos no Histórico para ver o ranking aqui.') +
+    rankCard('Piores margens (hoje)', svgIcon('alert'), stats.piores, 'Salve produtos no Histórico para ver o ranking aqui.');
+
+  function breakdownCard(title, icon, groups, emptyMsg){
+    if(!groups.length) return `<div class="card"><h2><span class="icon-chip">${icon}</span>${title}</h2><p class="desc">${emptyMsg}</p></div>`;
+    const maxCount = Math.max(...groups.map(g=>g.count));
+    const rows = groups.map(g=>`<div class="mini-bar-row">
+      <div class="top"><span class="name">${g.nome}</span><span class="sub">${g.count} produto${g.count!==1?'s':''} · margem média ${fmtPct(g.media)}</span></div>
+      <div class="mini-bar-track"><div class="mini-bar-fill" style="width:${(g.count/maxCount*100).toFixed(0)}%"></div></div>
+    </div>`).join('');
+    return `<div class="card"><h2><span class="icon-chip">${icon}</span>${title}</h2>${rows}</div>`;
+  }
+  document.getElementById('overview-breakdowns').innerHTML =
+    breakdownCard('Por fornecedor', svgIcon('factory'), stats.porFornecedor, 'Preencha o fornecedor ao salvar produtos para ver essa distribuição.') +
+    breakdownCard('Por linha de produto', svgIcon('tag'), stats.porLinha, 'Preencha a linha do produto ao salvar para ver essa distribuição.');
+}
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./service-worker.js').catch(() => {});
+  });
+}
+</script>
+</body>
+</html>
